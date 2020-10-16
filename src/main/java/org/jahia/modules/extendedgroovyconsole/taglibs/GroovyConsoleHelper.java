@@ -43,6 +43,8 @@
  */
 package org.jahia.modules.extendedgroovyconsole.taglibs;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.osgi.BundleResource;
@@ -70,11 +72,11 @@ public class GroovyConsoleHelper {
 
     public static final String WARN_MSG = "WARNING: You are about to execute a script, which can manipulate the repository data or execute services in Jahia. Are you sure, you want to continue?";
 
-    private static void generateCbFormElement(String paramName, StringBuilder sb, Properties confs,
+    private static void generateCbFormElement(String paramName, StringBuilder label, StringBuilder input, Properties confs,
                                               HttpServletRequest request) {
-        sb.append("<p><label for=\"scriptParam_").append(paramName).append("\">");
-        sb.append(confs.getProperty(String.format("script.param.%s.label", paramName), paramName)).append("</label> ");
-        sb.append("<input type=\"checkbox\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
+        label.append("<label for=\"scriptParam_").append(paramName).append("\">");
+        label.append(confs.getProperty(String.format("script.param.%s.label", paramName), paramName)).append("</label> ");
+        input.append("<input type=\"checkbox\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
                 .append(paramName);
         final String paramVal;
         if ("true".equals(request.getParameter("runScript"))) {
@@ -84,17 +86,17 @@ public class GroovyConsoleHelper {
         }
         if (StringUtils.isNotBlank(paramVal)
                 && ("on".equalsIgnoreCase(paramVal.trim()) || "true".equalsIgnoreCase(paramVal.trim())))
-            sb.append("\" checked=\"true");
-        sb.append("\" /></p>");
+            input.append("\" checked=\"true");
+        input.append("\" />");
     }
 
-    private static void generateFormElement(String paramName, StringBuilder sb, Properties confs,
+    private static void generateFormElement(String paramName, StringBuilder label, StringBuilder input, Properties confs,
                                             HttpServletRequest request) {
         final String paramType = confs.getProperty(String.format("script.param.%s.type", paramName), "checkbox").trim();
         if ("checkbox".equals(paramType)) {
-            generateCbFormElement(paramName, sb, confs, request);
+            generateCbFormElement(paramName, label, input, confs, request);
         } else if ("text".equals(paramType)) {
-            generateTextFormElement(paramName, sb, confs, request);
+            generateTextFormElement(paramName, label, input, confs, request);
         } else {
             logger.error(
                     String.format("Unsupported form element type form the parameter %s: %s", paramName, paramType));
@@ -362,11 +364,11 @@ public class GroovyConsoleHelper {
         return code;
     }
 
-    private static void generateTextFormElement(String paramName, StringBuilder sb, Properties confs,
+    private static void generateTextFormElement(String paramName, StringBuilder label, StringBuilder input, Properties confs,
                                                 HttpServletRequest request) {
-        sb.append("<p><label for=\"scriptParam_").append(paramName).append("\">");
-        sb.append(confs.getProperty(String.format("script.param.%s.label", paramName), paramName)).append("</label> ");
-        sb.append("<input type=\"text\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
+        label.append("<label for=\"scriptParam_").append(paramName).append("\">");
+        label.append(confs.getProperty(String.format("script.param.%s.label", paramName), paramName)).append("</label> ");
+        input.append("<input type=\"text\" style=\"width:100%\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
                 .append(paramName);
         final String paramVal;
         if ("true".equals(request.getParameter("runScript"))) {
@@ -375,8 +377,8 @@ public class GroovyConsoleHelper {
             paramVal = confs.getProperty(String.format("script.param.%s.default", paramName), "");
         }
         if (StringUtils.isNotBlank(paramVal))
-            sb.append("\" value=\"").append(paramVal);
-        sb.append("\" /></p>");
+            input.append("\" value=\"").append(paramVal);
+        input.append("\" />");
     }
 
     /**
@@ -422,8 +424,15 @@ public class GroovyConsoleHelper {
                 confs.load(resource.getInputStream());
                 final String[] paramNames = StringUtils
                         .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
-                for (String paramName : paramNames) {
-                    generateFormElement(paramName.trim(), sb, confs, request);
+                if (ArrayUtils.isNotEmpty(paramNames)) {
+                    sb.append("<table><colgroup><col><col width=\"60%\"></colgroup>");
+                    for (String paramName : paramNames) {
+                        final StringBuilder label = new StringBuilder();
+                        final StringBuilder input = new StringBuilder();
+                        generateFormElement(paramName.trim(), label, input, confs, request);
+                        sb.append("<tr><td>").append(label.toString()).append("</td><td>").append(input.toString()).append("</td></tr>");
+                    }
+                    sb.append("</table>");
                 }
 
             }
