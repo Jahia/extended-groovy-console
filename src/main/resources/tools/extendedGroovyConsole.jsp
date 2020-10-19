@@ -208,6 +208,8 @@
         <p>If some predefined script requires some configurations, then you have to create in the same folder a file with the same name as the script
             and <em>.properties</em> as an extension. In this file, you can declare and configure the required parameters:</p>
         <ul>
+            <li><em>script.title</em>: title of the script</li>
+            <li><em>script.description</em>: short description of the script</li>
             <li><em>script.parameters.names</em>: comma separated list of parameters</li>
             <li><em>script.param.xxx.type</em>: type of the parameter xxx <br />
                 Allowed values: <em>checkbox</em>, <em>text</em><br />
@@ -220,6 +222,8 @@
 
         <p><strong>Example: helloworld.properties</strong>
         <pre>
+    script.title=Hello world demo
+    script.description=Tell your name to the script to get a personalized hello message!
     script.parameters.names=active, name
     script.param.active.default=true
     script.param.name.type=text

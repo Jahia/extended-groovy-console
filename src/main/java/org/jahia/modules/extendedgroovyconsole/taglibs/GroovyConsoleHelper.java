@@ -422,6 +422,12 @@ public class GroovyConsoleHelper {
             if (resource.exists()) {
                 final Properties confs = new Properties();
                 confs.load(resource.getInputStream());
+                final String title = confs.getProperty("script.title");
+                if (StringUtils.isNotBlank(title))
+                    sb.append("<h2>").append(title).append("</h2>");
+                final String desc = confs.getProperty("script.description");
+                if (StringUtils.isNotBlank(desc))
+                    sb.append("<p>").append(desc).append("</p>");
                 final String[] paramNames = StringUtils
                         .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
                 if (ArrayUtils.isNotEmpty(paramNames)) {
