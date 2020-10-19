@@ -212,12 +212,17 @@
             <li><em>script.description</em>: short description of the script</li>
             <li><em>script.parameters.names</em>: comma separated list of parameters</li>
             <li><em>script.param.xxx.type</em>: type of the parameter xxx <br />
-                Allowed values: <em>checkbox</em>, <em>text</em><br />
+                Allowed values: <em>checkbox</em>, <em>text</em>, <em>choicelist</em><br />
                 Default value: <em>checkbox</em></li>
             <li><em>script.param.xxx.label</em>: label for the parameter xxx</li>
             <li><em>script.param.xxx.default</em>: default value of the parameter xxx <br />
                 For a checkbox parameter, the checkbox is unchecked by default, use <em>true</em> as a default value otherwise <br />
-                For a text parameter, the input field is empty by default</li>
+                For a text parameter, the input field is empty by default<br />
+                For a choicelist, the default value is selected<br />
+            </li>
+            <li><em>script.param.xxx.values</em>: list of values for the parameter xxx<br />
+                Effective only if the parameter is of type <em>choicelist</em>
+            </li>
         </ul>
 
         <p><strong>Example: helloworld.properties</strong>
