@@ -24,9 +24,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="tools" uri="http://www.jahia.org/tags/tools/extendedgroovyconsole" %>
+<c:set var="pageTitle" value="Extended Groovy Console" />
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Groovy Console</title>
+    <title>${pageTitle}</title>
     <%@ include file="css.jspf" %>
     <link type="text/css" href="<c:url value='/modules/assets/css/jquery.fancybox.css'/>" rel="stylesheet"/>
     <script type="text/javascript" src="<c:url value='/modules/jquery/javascript/jquery.min.js'/>"></script>
@@ -42,7 +43,7 @@
     </script>
 </head>
 <body>
-<h1>Groovy Console&nbsp;<a class="fancybox-link" title="Help" href="#helpArea"><img
+<h1>${pageTitle}&nbsp;<a class="fancybox-link" title="Help" href="#helpArea"><img
         src="<c:url value='/icons/help.png'/>" width="16" height="16" alt="help" title="Help"></a></h1>
 <%
     long timer = System.currentTimeMillis();
