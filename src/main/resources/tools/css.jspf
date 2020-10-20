@@ -1,1 +1,2 @@
 <link rel="stylesheet" href="<c:url value='/modules/tools/css/tools.css'/>" type="text/css" />
+<link rel="stylesheet" href="<c:url value='/modules/extended-groovy-console/css/xgroovy-console.css'/>" type="text/css" />

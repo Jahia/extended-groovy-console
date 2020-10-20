@@ -370,6 +370,7 @@ public class GroovyConsoleHelper {
             final UrlResource resource = new UrlResource(
                     StringUtils.substringBeforeLast(scriptURI, ".groovy") + ".properties");
             if (resource.exists()) {
+                sb.append("<div class=\"scriptConfig\">");
                 final Properties confs = new Properties();
                 confs.load(resource.getInputStream());
                 final String title = confs.getProperty("script.title");
@@ -392,7 +393,7 @@ public class GroovyConsoleHelper {
                     }
                     sb.append("</table>");
                 }
-
+                sb.append("</div>");
             }
         } catch (IOException e) {
             logger.error("An error occured while reading the configurations for the script " + scriptURI, e);
@@ -467,7 +468,7 @@ public class GroovyConsoleHelper {
 
     private static void generateTextFormElement(String paramName, StringBuilder sb, Properties confs,
                                                 HttpServletRequest request) {
-        sb.append("<input type=\"text\" style=\"width:100%\" name=\"scriptParam_").append(paramName)
+        sb.append("<input type=\"text\" name=\"scriptParam_").append(paramName)
                 .append("\" id=\"scriptParam_").append(paramName);
         final String paramVal;
         if ("true".equals(request.getParameter("runScript"))) {

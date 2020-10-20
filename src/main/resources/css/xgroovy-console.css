@@ -1,0 +1,9 @@
+.scriptConfig table {
+    width: 100%;
+}
+.scriptConfig td {
+    padding-bottom: 5px;
+}
+.scriptConfig input[type='text'] {
+    width: 100%;
+}
