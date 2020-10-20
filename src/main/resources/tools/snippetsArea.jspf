@@ -10,7 +10,7 @@
                     <h4>${skeleton.label}</h4>
                     <div>
                         <pre id="skel${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${skeleton.code}" /></pre>
-                        <button onclick="document.getElementById('text').value=document.getElementById('skel${status.count}').innerText;$.fancybox.close()">Use it in the console</button>
+                        <button onclick="injectSkeleton('skel${status.count}')">Use it in the console</button>
                     </div>
                 </c:forEach>
             </div>
@@ -22,8 +22,8 @@
                 <c:forEach var="snippet" items="${snippets}" varStatus="status">
                     <h4>${snippet.label}</h4>
                     <div>
-                        <pre id="skel${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${snippet.code}" /></pre>
-                        <button onclick="document.getElementById('text').value=document.getElementById('skel${status.count}').innerText;$.fancybox.close()">Use it in the console</button>
+                        <pre id="snip${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${snippet.code}" /></pre>
+                        <button onclick="copySnippet('snip${status.count}')">Copy to clipboard</button>
                     </div>
                 </c:forEach>
             </div>

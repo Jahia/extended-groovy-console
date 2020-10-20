@@ -48,6 +48,17 @@
                 'transitionOut': 'none'
             });
         });
+
+        function injectSkeleton(id) {
+            document.getElementById('text').value = document.getElementById(id).innerText;
+            $.fancybox.close()
+        }
+
+        function copySnippet(id) {
+            let copyText = document.getElementById(id);
+            navigator.clipboard.writeText(copyText.innerText);
+            $.fancybox.close();
+        }
     </script>
 </head>
 <body>
