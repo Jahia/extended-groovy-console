@@ -23,6 +23,7 @@
 <%@ page import="org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="functions" uri="http://www.jahia.org/tags/functions" %>
 <%@ taglib prefix="tools" uri="http://www.jahia.org/tags/tools/extendedgroovyconsole" %>
 <c:set var="pageTitle" value="Extended Groovy Console" />
 <head>
@@ -30,10 +31,17 @@
     <title>${pageTitle}</title>
     <%@ include file="css.jspf" %>
     <link type="text/css" href="<c:url value='/modules/assets/css/jquery.fancybox.css'/>" rel="stylesheet"/>
+    <link type="text/css" href="<c:url value='/modules/assets/css/jquery-ui.smoothness.css'/>" rel="stylesheet"/>
     <script type="text/javascript" src="<c:url value='/modules/jquery/javascript/jquery.min.js'/>"></script>
     <script type="text/javascript" src="<c:url value='/modules/assets/javascript/jquery.fancybox.pack.js'/>"></script>
+    <script type="text/javascript" src="<c:url value='/modules/assets/javascript/jquery-ui.min.js'/>"></script>
     <script type="text/javascript">
         $(document).ready(function () {
+            $(".snippetsAreaContent").accordion({
+                collapsible: true,
+                active:false
+            });
+            $("#snippetsAreaWrapper").hide();
             $('a.fancybox-link').fancybox({
                 'hideOnContentClick': false,
                 'titleShow': false,
@@ -183,6 +191,7 @@
                     <textarea rows="25" style="width: 100%" id="text" name="script"
                               onkeyup="if ((event || window.event).keyCode == 13 && (event || window.event).ctrlKey && confirm(<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
             </p>
+            <a class="fancybox-link" href="#snippetsArea">Code snippets</a>
         </c:when>
         <c:otherwise>
             ${tools:getScriptCustomFormElements(param.scriptURI, pageContext.request)}
@@ -255,5 +264,6 @@
         </div>
     </div>
 </c:if>
+<%@include file="snippetsArea.jspf"%>
 </body>
 </html>

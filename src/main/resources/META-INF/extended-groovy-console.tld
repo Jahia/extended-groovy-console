@@ -22,4 +22,15 @@
         <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
         <function-signature>java.lang.String getScriptCustomFormElements(java.lang.String,javax.servlet.http.HttpServletRequest))</function-signature>
     </function>
+    <function>
+        <name>getCodeSkeletons</name>
+        <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
+        <function-signature>java.util.Collection getCodeSkeletons()</function-signature>
+    </function>
+    <function>
+        <name>getCodeSnippets</name>
+        <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
+        <function-signature>java.util.Collection getCodeSnippets()()</function-signature>
+    </function>
+
 </taglib>

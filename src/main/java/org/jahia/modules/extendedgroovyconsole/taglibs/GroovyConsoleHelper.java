@@ -46,6 +46,7 @@ package org.jahia.modules.extendedgroovyconsole.taglibs;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
+import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator;
 import org.jahia.osgi.BundleResource;
 import org.jahia.registries.ServicesRegistry;
 import org.osgi.framework.Bundle;
@@ -327,7 +328,6 @@ public class GroovyConsoleHelper {
         code.append("import sun.security.action.*\n");
         code.append("import ucar.nc2.util.net.*\n");
         code.append("\n");
-        logger.info("CAPACITY: " + code.capacity());
         return code;
     }
 
@@ -499,4 +499,11 @@ public class GroovyConsoleHelper {
         sb.append("</select>");
     }
 
+    public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSkeletons() {
+        return CodeSkeletonsLocator.getSkeletons();
+    }
+
+    public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSnippets() {
+        return CodeSkeletonsLocator.getSnippets();
+    }
 }

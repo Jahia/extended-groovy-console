@@ -1,0 +1,32 @@
+<%@ page import="org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator" %>
+<%@ page import="org.jahia.osgi.BundleResource" %>
+<div id="snippetsAreaWrapper" style="display: block">
+    <div id="snippetsArea" style="width: 800px">
+        <c:set var="skeletons" value="${tools:getCodeSkeletons()}" />
+        <c:if test="${not empty skeletons}">
+            <h3>Code skeletons</h3>
+            <div class="snippetsAreaContent">
+                <c:forEach var="skeleton" items="${skeletons}" varStatus="status">
+                    <h4>${skeleton.label}</h4>
+                    <div>
+                        <pre id="skel${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${skeleton.code}" /></pre>
+                        <button onclick="document.getElementById('text').value=document.getElementById('skel${status.count}').innerText;$.fancybox.close()">Use it in the console</button>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:if>
+        <c:set var="snippets" value="${tools:getCodeSnippets()}" />
+        <c:if test="${not empty snippets}">
+            <h3>Code snippets</h3>
+            <div class="snippetsAreaContent">
+                <c:forEach var="snippet" items="${snippets}" varStatus="status">
+                    <h4>${snippet.label}</h4>
+                    <div>
+                        <pre id="skel${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${snippet.code}" /></pre>
+                        <button onclick="document.getElementById('text').value=document.getElementById('skel${status.count}').innerText;$.fancybox.close()">Use it in the console</button>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:if>
+    </div>
+</div>
