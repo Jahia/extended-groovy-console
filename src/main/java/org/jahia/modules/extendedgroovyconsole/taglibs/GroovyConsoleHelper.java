@@ -49,6 +49,7 @@ import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator;
 import org.jahia.osgi.BundleResource;
 import org.jahia.registries.ServicesRegistry;
+import org.jahia.settings.SettingsBean;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,8 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for the Groovy Console.
@@ -355,8 +358,45 @@ public class GroovyConsoleHelper {
             return;
         while (resourceEnum.hasMoreElements()) {
             final BundleResource bundleResource = new BundleResource(resourceEnum.nextElement(), bundle);
-            scripts.add(bundleResource);
+            try {
+                final Properties configurations = getScriptConfigurations(bundleResource.getURI().toString());
+                final String visibilityKey = "script.visibilityCondition";
+                final boolean scriptVisible;
+                if (configurations == null || !configurations.containsKey(visibilityKey)) {
+                    scriptVisible = true;
+                } else {
+                    final String visibilityCondition = configurations.getProperty(visibilityKey);
+                    final Matcher matcher = Pattern.compile("\\{(.*)=(.*)}").matcher(visibilityCondition);
+                    if (matcher.matches()) {
+                        final String property = SettingsBean.getInstance().getPropertiesFile().getProperty(matcher.group(1));
+                        scriptVisible = StringUtils.equals(property, matcher.group(2));
+                    } else {
+                        scriptVisible = Boolean.parseBoolean(SettingsBean.getInstance().getPropertiesFile().getProperty(configurations.getProperty(visibilityKey)));
+                    }
+                }
+                if (scriptVisible)
+                    scripts.add(bundleResource);
+            } catch (IOException e) {
+                logger.error("", e);
+            }
         }
+    }
+
+    private static Properties getScriptConfigurations(String scriptURI) {
+        if (StringUtils.isBlank(scriptURI)) {
+            return null;
+        }
+        try {
+            final UrlResource resource = new UrlResource(
+                    String.format("%s.properties", StringUtils.substringBeforeLast(scriptURI, ".groovy")));
+            if (!resource.exists()) return null;
+            final Properties confs = new Properties();
+            confs.load(resource.getInputStream());
+            return confs;
+        } catch (IOException ioe) {
+            logger.error("An error occured while reading the configurations for the script " + scriptURI, ioe);
+        }
+        return null;
     }
 
     /**
@@ -370,46 +410,36 @@ public class GroovyConsoleHelper {
         if (StringUtils.isBlank(scriptURI)) {
             return StringUtils.EMPTY;
         }
+
+        final Properties confs = getScriptConfigurations(scriptURI);
+        if (confs == null) {
+            return StringUtils.EMPTY;
+        }
+
         final StringBuilder sb = new StringBuilder();
-        try {
-            final UrlResource resource = new UrlResource(
-                    StringUtils.substringBeforeLast(scriptURI, ".groovy") + ".properties");
-            if (resource.exists()) {
-                sb.append("<div class=\"scriptConfig\">");
-                final Properties confs = new Properties();
-                confs.load(resource.getInputStream());
-                final String title = confs.getProperty("script.title");
-                if (StringUtils.isNotBlank(title))
-                    sb.append("<h2>").append(title).append("</h2>");
-                final String desc = confs.getProperty("script.description");
-                if (StringUtils.isNotBlank(desc))
-                    sb.append("<p>").append(desc).append("</p>");
-                final String[] paramNames = StringUtils
-                        .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
-                if (ArrayUtils.isNotEmpty(paramNames)) {
-                    sb.append("<table><colgroup><col><col width=\"60%\"></colgroup>");
-                    for (String paramName : paramNames) {
-                        final StringBuilder label = new StringBuilder();
-                        final StringBuilder input = new StringBuilder();
-                        if (generateFormElement(paramName.trim(), input, confs, request)) {
-                            generateFormElementLabel(paramName.trim(), label, confs);
-                            sb.append("<tr><td>").append(label.toString()).append("</td><td>").append(input.toString()).append("</td></tr>");
-                        }
-                    }
-                    sb.append("</table>");
+        sb.append("<fieldset><legend>Script configuration</legend><div class=\"scriptConfig\">");
+        final String title = confs.getProperty("script.title");
+        if (StringUtils.isNotBlank(title))
+            sb.append("<h2>").append(title).append("</h2>");
+        final String desc = confs.getProperty("script.description");
+        if (StringUtils.isNotBlank(desc))
+            sb.append("<p>").append(desc).append("</p>");
+        final String[] paramNames = StringUtils
+                .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
+        if (ArrayUtils.isNotEmpty(paramNames)) {
+            sb.append("<table><colgroup><col><col width=\"60%\"></colgroup>");
+            for (String paramName : paramNames) {
+                final StringBuilder label = new StringBuilder();
+                final StringBuilder input = new StringBuilder();
+                if (generateFormElement(paramName.trim(), input, confs, request)) {
+                    generateFormElementLabel(paramName.trim(), label, confs);
+                    sb.append("<tr><td>").append(label.toString()).append("</td><td>").append(input.toString()).append("</td></tr>");
                 }
-                sb.append("</div>");
             }
-        } catch (IOException e) {
-            logger.error("An error occured while reading the configurations for the script " + scriptURI, e);
-            return StringUtils.EMPTY;
+            sb.append("</table>");
         }
-        final String formElements = sb.toString();
-        if (StringUtils.isBlank(formElements)) {
-            return StringUtils.EMPTY;
-        }
-        return sb.delete(0, sb.length()).append("<fieldset><legend>Script configuration</legend>").append(formElements)
-                .append("</fieldset>").toString();
+        sb.append("</div></fieldset>");
+        return sb.toString();
     }
 
     /**
