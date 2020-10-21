@@ -342,16 +342,21 @@ public class GroovyConsoleHelper {
                 .getAvailableTemplatePackages()) {
             final Bundle bundle = aPackage.getBundle();
             if (bundle != null) {
-                final Enumeration<URL> resourceEnum = bundle.findEntries("META-INF/groovyConsole", "*.groovy", false);
-                if (resourceEnum == null)
-                    continue;
-                while (resourceEnum.hasMoreElements()) {
-                    final BundleResource bundleResource = new BundleResource(resourceEnum.nextElement(), bundle);
-                    scripts.add(bundleResource);
-                }
+                scanGroovyConsoleScripts(bundle, "groovyConsole", scripts);
+                scanGroovyConsoleScripts(bundle, "extendedGroovyConsole", scripts);
             }
         }
         return scripts;
+    }
+
+    private static void scanGroovyConsoleScripts(Bundle bundle, String folder, Collection<BundleResource> scripts) {
+        final Enumeration<URL> resourceEnum = bundle.findEntries(String.format("META-INF/%s", folder), "*.groovy", false);
+        if (resourceEnum == null)
+            return;
+        while (resourceEnum.hasMoreElements()) {
+            final BundleResource bundleResource = new BundleResource(resourceEnum.nextElement(), bundle);
+            scripts.add(bundleResource);
+        }
     }
 
     /**
