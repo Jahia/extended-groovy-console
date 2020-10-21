@@ -43,6 +43,7 @@
  */
 package org.jahia.modules.extendedgroovyconsole.taglibs;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
@@ -61,7 +62,9 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -339,14 +342,18 @@ public class GroovyConsoleHelper {
      *
      * @return a collection of BundleResource, representing scripts, which are found in all active module bundles
      */
-    public static Collection<BundleResource> getGroovyConsoleScripts() {
-        final TreeSet<BundleResource> scripts = new TreeSet<>(Comparator.comparing(UrlResource::getFilename));
+    public static Map<String, Collection<BundleResource>> getGroovyConsoleScripts() {
+        final Map<String, Collection<BundleResource>> scripts = new TreeMap<>();
         for (final JahiaTemplatesPackage aPackage : ServicesRegistry.getInstance().getJahiaTemplateManagerService()
                 .getAvailableTemplatePackages()) {
             final Bundle bundle = aPackage.getBundle();
             if (bundle != null) {
-                scanGroovyConsoleScripts(bundle, "groovyConsole", scripts);
-                scanGroovyConsoleScripts(bundle, "extendedGroovyConsole", scripts);
+                final TreeSet<BundleResource> bundleScripts = new TreeSet<>(Comparator.comparing(UrlResource::getFilename));
+                scanGroovyConsoleScripts(bundle, "groovyConsole", bundleScripts);
+                scanGroovyConsoleScripts(bundle, "extendedGroovyConsole", bundleScripts);
+                if (CollectionUtils.isNotEmpty(bundleScripts)) {
+                    scripts.put(String.format("%s (%s)", bundle.getSymbolicName(), bundle.getVersion()), bundleScripts);
+                }
             }
         }
         return scripts;

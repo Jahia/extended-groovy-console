@@ -14,7 +14,7 @@
         <description>Returns a collection of BundleResource, representing scripts, which are found in all active module bundles.</description>
         <name>getGroovyConsoleScripts</name>
         <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
-        <function-signature>java.util.Collection getGroovyConsoleScripts()</function-signature>
+        <function-signature>java.util.Map getGroovyConsoleScripts()</function-signature>
     </function>
     <function>
         <description>Returns a generated HTML with form elements for the script parameters.</description>

@@ -181,11 +181,15 @@
             Chose a pre-defined script to be executed:
             <select name="scriptURI" onchange="document.getElementById('runScript').setAttribute('value','false'); document.getElementById('groovyForm').submit();">
                 <option value="custom" class="scriptURISelection">---</option>
-                    <%--@elvariable id="script" type="org.jahia.osgi.BundleResource"--%>
-                <c:forEach items="${scripts}" var="script">
-                    <c:remove var="currentScriptIsSelected" />
-                    <c:if test="${script.URI eq param.scriptURI}"><c:set var="currentScriptIsSelected">selected='selected'</c:set><c:set var="currentScriptFilename" value="${script.filename}"/></c:if>
-                    <option value="${script.URI}" class="scriptURISelection" ${currentScriptIsSelected}><c:out value="${script.filename} [${script.bundle.symbolicName}/${script.bundle.version}]" /></option>
+                <c:forEach items="${scripts}" var="bundle">
+                    <optgroup label="${bundle.key}">
+                        <c:forEach items="${bundle.value}" var="script">
+                            <%--@elvariable id="script" type="org.jahia.osgi.BundleResource"--%>
+                            <c:remove var="currentScriptIsSelected" />
+                            <c:if test="${script.URI eq param.scriptURI}"><c:set var="currentScriptIsSelected">selected='selected'</c:set><c:set var="currentScriptFilename" value="${script.filename}"/></c:if>
+                            <option value="${script.URI}" class="scriptURISelection" ${currentScriptIsSelected}><c:out value="${script.filename}" /></option>
+                        </c:forEach>
+                    </optgroup>
                 </c:forEach>
             </select>
             <c:if test="${not empty scriptContent}">
