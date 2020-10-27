@@ -46,22 +46,31 @@ package org.jahia.modules.extendedgroovyconsole.taglibs;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jahia.api.Constants;
 import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator;
 import org.jahia.osgi.BundleResource;
 import org.jahia.registries.ServicesRegistry;
+import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.JCRSessionFactory;
+import org.jahia.services.content.nodetypes.initializers.ChoiceListInitializer;
+import org.jahia.services.content.nodetypes.initializers.ChoiceListInitializerService;
+import org.jahia.services.content.nodetypes.initializers.ChoiceListValue;
 import org.jahia.settings.SettingsBean;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.UrlResource;
 
+import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -430,7 +439,7 @@ public class GroovyConsoleHelper {
             sb.append("<h2>").append(title).append("</h2>");
         final String desc = confs.getProperty("script.description");
         if (StringUtils.isNotBlank(desc))
-            sb.append("<p>").append(desc).append("</p>");
+            sb.append("<div>").append(desc).append("</div>");
         final String[] paramNames = StringUtils
                 .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
         if (ArrayUtils.isNotEmpty(paramNames)) {
@@ -534,12 +543,57 @@ public class GroovyConsoleHelper {
             paramVal = confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
         }
         final String values = confs.getProperty(String.format("script.param.%s.values", paramName));
-        for (String v : StringUtils.split(values, ',')) {
-            final String[] split = StringUtils.split(v, "::");
-            final String label = split.length > 1 ? split[1] : split[0];
-            sb.append("<option value=\"").append(split[0].trim()).append("\">").append(label.trim()).append("</option>");
-        }
+        generateStaticOptions(values, paramVal, sb);
+        final String dynamicvalues = confs.getProperty(String.format("script.param.%s.dynamicvalues", paramName));
+        generateDynamicOptions(dynamicvalues, paramVal, sb);
         sb.append("</select>");
+    }
+
+    private static void generateStaticOptions(String values, String currentValue, StringBuilder sb) {
+        if (StringUtils.isBlank(values)) return;
+
+        for (String v : StringUtils.split(values, ',')) {
+            final String[] split = StringUtils.split(v, ":", 2);
+            final String label = split.length > 1 ? split[1] : split[0];
+            final String value = split[0].trim();
+            sb.append("<option value=\"").append(value);
+            if (StringUtils.equals(value, currentValue))
+                sb.append("\" selected=\"selected");
+            sb.append("\">").append(label.trim()).append("</option>");
+        }
+    }
+
+    private static void generateDynamicOptions(String values, String currentValue, StringBuilder sb) {
+        if (StringUtils.isBlank(values)) return;
+
+        final Map<String, ChoiceListInitializer> initializerMap = ChoiceListInitializerService.getInstance().getInitializers();
+        final String[] initializers = StringUtils.split(values, ',');
+        List<ChoiceListValue> clValues = null;
+        for (String initializer : initializers) {
+            final String[] parts = StringUtils.split(initializer, "='");
+            final ChoiceListInitializer choiceListInitializer = initializerMap.get(parts[0].trim());
+            if (choiceListInitializer == null) continue;
+            final String param = parts.length > 1 ? parts[1].trim() : null;
+            final Map<String, Object> context = new HashMap<String, Object>();
+            try {
+                final JCRNodeWrapper systemsite = JCRSessionFactory.getInstance().getCurrentSystemSession(Constants.EDIT_WORKSPACE, null, null).getNode("/sites/systemsite");
+                context.put("contextParent", systemsite);
+                clValues = choiceListInitializer.getChoiceListValues(null, param, clValues, null, context);
+            } catch (RepositoryException e) {
+                logger.error("", e);
+            }
+        }
+        for (ChoiceListValue clValue : clValues) {
+            try {
+                final String value = clValue.getValue().getString().trim();
+                sb.append("<option value=\"").append(value);
+                if (StringUtils.equals(value, currentValue))
+                    sb.append("\" selected=\"selected");
+                sb.append("\">").append(clValue.getDisplayName()).append("</option>");
+            } catch (RepositoryException e) {
+                logger.error("", e);
+            }
+        }
     }
 
     public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSkeletons() {
