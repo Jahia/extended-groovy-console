@@ -68,7 +68,9 @@ If a default value is defined, then it is preselected. Static and dynamic values
 
 **Example:**
 
-    script.parameters.names=site
+    script.parameters.names=workspace, site
+    script.param.workspace.type=choicelist
+    script.param.workspace.values=default, live
     script.param.site.type=choicelist
     script.param.site.values=all:All sites
     script.param.site.dynamicvalues=nodes=/sites;jnt:virtualsite
