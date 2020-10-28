@@ -40,9 +40,10 @@
     <script type="text/javascript" src="<c:url value='/modules/assets/javascript/jquery-ui.min.js'/>"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $(".snippetsAreaContent").accordion({
+            $(".codeAreaContent").accordion({
                 collapsible: true,
-                active:false
+                active: false,
+                heightStyle: 'content'
             });
             $("#snippetsAreaWrapper").hide();
             $('a.fancybox-link').fancybox({

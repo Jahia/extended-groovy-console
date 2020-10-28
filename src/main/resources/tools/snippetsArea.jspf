@@ -5,11 +5,11 @@
         <c:set var="skeletons" value="${tools:getCodeSkeletons()}" />
         <c:if test="${not empty skeletons}">
             <h3>Code skeletons</h3>
-            <div class="snippetsAreaContent">
+            <div class="codeAreaContent">
                 <c:forEach var="skeleton" items="${skeletons}" varStatus="status">
                     <h4>${skeleton.label}</h4>
                     <div>
-                        <pre id="skel${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${skeleton.code}" /></pre>
+                        <pre id="skel${status.count}" class="code"><c:out value="${skeleton.code}" /></pre>
                         <button onclick="injectSkeleton('skel${status.count}')">Use it in the console</button>
                     </div>
                 </c:forEach>
@@ -18,12 +18,20 @@
         <c:set var="snippets" value="${tools:getCodeSnippets()}" />
         <c:if test="${not empty snippets}">
             <h3>Code snippets</h3>
-            <div class="snippetsAreaContent">
+            <div class="codeAreaContent">
                 <c:forEach var="snippet" items="${snippets}" varStatus="status">
                     <h4>${snippet.label}</h4>
                     <div>
-                        <pre id="snip${status.count}" style="height: 200px; overflow-x: hidden; overflow-y: scroll"><c:out value="${snippet.code}" /></pre>
-                        <button onclick="copySnippet('snip${status.count}')">Copy to clipboard</button>
+                        <c:if test="${not empty snippet.imports}">
+                        <fieldset>
+                            <pre id="snip-imports-${status.count}" class="code"><c:out value="${snippet.imports}" /></pre>
+                            <button onclick="copySnippet('snip-imports-${status.count}')">Copy to clipboard</button>
+                        </fieldset>
+                        </c:if>
+                        <fieldset>
+                            <pre id="snip${status.count}" class="code"><c:out value="${snippet.code}" /></pre>
+                            <button onclick="copySnippet('snip${status.count}')">Copy to clipboard</button>
+                        </fieldset>
                     </div>
                 </c:forEach>
             </div>
