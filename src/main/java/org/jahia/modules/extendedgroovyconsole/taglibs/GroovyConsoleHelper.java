@@ -66,15 +66,7 @@ import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -578,7 +570,7 @@ public class GroovyConsoleHelper {
             try {
                 final JCRNodeWrapper systemsite = JCRSessionFactory.getInstance().getCurrentSystemSession(Constants.EDIT_WORKSPACE, null, null).getNode("/sites/systemsite");
                 context.put("contextParent", systemsite);
-                clValues = choiceListInitializer.getChoiceListValues(null, param, clValues, null, context);
+                clValues = choiceListInitializer.getChoiceListValues(null, param, clValues, Locale.ENGLISH, context);
             } catch (RepositoryException e) {
                 logger.error("", e);
             }
