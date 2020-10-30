@@ -46,7 +46,7 @@ In this file, you can declare and configure the required parameters
 
 **Parameter types**
 
-__Allowed values__: checkbox, text, choicelist  \
+__Allowed values__: checkbox, text, textarea, choicelist  \
 __Default value__: checkbox
 
 #### Parameter type: checkbox
@@ -56,6 +56,10 @@ For a checkbox parameter, the checkbox is unchecked by default, use _true_ as a 
 #### Parameter type: text
 
 For a text parameter, the input field is empty by default, unless a default value is specified for the parameter.
+
+#### Parameter type: textarea
+
+For a textarea parameter, the input field is empty by default, unless a default value is specified for the parameter.
 
 #### Parameter type: choicelist
 
