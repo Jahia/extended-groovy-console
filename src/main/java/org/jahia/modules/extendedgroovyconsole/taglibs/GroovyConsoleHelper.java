@@ -376,10 +376,10 @@ public class GroovyConsoleHelper {
                     final String visibilityCondition = configurations.getProperty(visibilityKey);
                     final Matcher matcher = Pattern.compile("\\{(.*)=(.*)}").matcher(visibilityCondition);
                     if (matcher.matches()) {
-                        final String property = SettingsBean.getInstance().getPropertiesFile().getProperty(matcher.group(1));
+                        final String property = getProperty(matcher.group(1));
                         scriptVisible = StringUtils.equals(property, matcher.group(2));
                     } else {
-                        scriptVisible = Boolean.parseBoolean(SettingsBean.getInstance().getPropertiesFile().getProperty(configurations.getProperty(visibilityKey)));
+                        scriptVisible = Boolean.parseBoolean(getProperty(configurations.getProperty(visibilityKey)));
                     }
                 }
                 if (scriptVisible)
@@ -388,6 +388,11 @@ public class GroovyConsoleHelper {
                 logger.error("", e);
             }
         }
+    }
+
+    private static String getProperty(String name) {
+        final String property = SettingsBean.getInstance().getPropertiesFile().getProperty(name);
+        return property != null ? property : System.getProperty(name);
     }
 
     private static Properties getScriptConfigurations(String scriptURI) {

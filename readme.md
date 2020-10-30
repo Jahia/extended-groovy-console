@@ -78,7 +78,7 @@ If a default value is defined, then it is preselected. Static and dynamic values
 #### <a name="visibility-condition">Visibility condition
 
 You might need your script to be available only on some environments. You can make its availability depend on
-some `jahia.properties` parameter.
+some `jahia.properties` parameter or system property.
 
 The script will be available in the list only if the parameter `environment.continuousIntegration`
 is defined and equal to `true`: 
