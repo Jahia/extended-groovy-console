@@ -4,7 +4,8 @@
 .scriptConfig td {
     padding-bottom: 5px;
 }
-.scriptConfig input[type='text'] {
+.scriptConfig input[type='text'],
+.scriptConfig textarea {
     width: 100%;
 }
 .codeAreaContent .code {

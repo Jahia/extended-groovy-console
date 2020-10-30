@@ -483,11 +483,13 @@ public class GroovyConsoleHelper {
             generateCbFormElement(paramName, input, confs, request);
         } else if ("text".equals(paramType)) {
             generateTextFormElement(paramName, input, confs, request);
+        } else if ("textarea".equals(paramType)) {
+            generateTextareaFormElement(paramName, input, confs, request);
         } else if ("choicelist".equalsIgnoreCase(paramType)) {
             generateChoiceListFormElement(paramName, input, confs, request);
         } else {
             logger.error(
-                    String.format("Unsupported form element type form the parameter %s: %s", paramName, paramType));
+                    String.format("Unsupported form element type for the parameter %s: %s", paramName, paramType));
             return false;
         }
         return true;
@@ -502,12 +504,7 @@ public class GroovyConsoleHelper {
                                               HttpServletRequest request) {
         sb.append("<input type=\"checkbox\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
                 .append(paramName);
-        final String paramVal;
-        if ("true".equals(request.getParameter("runScript"))) {
-            paramVal = request.getParameter("scriptParam_" + paramName);
-        } else {
-            paramVal = confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
-        }
+        final String paramVal = getElementDefaultValue(paramName, confs, request);
         if (StringUtils.isNotBlank(paramVal)
                 && ("on".equalsIgnoreCase(paramVal.trim()) || "true".equalsIgnoreCase(paramVal.trim())))
             sb.append("\" checked=\"true");
@@ -516,29 +513,46 @@ public class GroovyConsoleHelper {
 
     private static void generateTextFormElement(String paramName, StringBuilder sb, Properties confs,
                                                 HttpServletRequest request) {
-        sb.append("<input type=\"text\" name=\"scriptParam_").append(paramName)
-                .append("\" id=\"scriptParam_").append(paramName);
-        final String paramVal;
-        if ("true".equals(request.getParameter("runScript"))) {
-            paramVal = request.getParameter("scriptParam_" + paramName);
-        } else {
-            paramVal = confs.getProperty(String.format("script.param.%s.default", paramName), "");
-        }
+        sb.append("<input type=\"text\" ");
+        sb.append("name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_").append(paramName);
+        final String paramVal = getElementDefaultValue(paramName, confs, request);
         if (StringUtils.isNotBlank(paramVal))
             sb.append("\" value=\"").append(paramVal);
         sb.append("\" />");
     }
 
+    private static void generateTextareaFormElement(String paramName, StringBuilder sb, Properties confs,
+                                                    HttpServletRequest request) {
+        sb.append("<textarea ");
+        sb.append("name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_").append(paramName).append("\">");
+        final String paramVal = getElementDefaultValue(paramName, confs, request);
+        if (StringUtils.isNotBlank(paramVal))
+            sb.append(paramVal);
+        sb.append("</textarea>");
+    }
+
+    /*
+    private static void generateSimpleFormElement(String markupName, boolean withBody, String additionalAttributes,
+                                                  String paramName, StringBuilder sb, Properties confs,
+                                                  HttpServletRequest request) {
+        sb.append("<").append(markupName);
+        if (StringUtils.isNotBlank(additionalAttributes)) sb.append(" ").append(additionalAttributes.trim());
+        sb.append(" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_").append(paramName);
+        final String paramVal = getElementDefaultValue(paramName, confs, request);
+        if (StringUtils.isNotBlank(paramVal))
+            sb.append("\" value=\"").append(paramVal);
+        if (withBody)
+            sb.append("\"></").append(markupName).append(">");
+        else
+            sb.append("\" />");
+    }
+    */
+
     private static void generateChoiceListFormElement(String paramName, StringBuilder sb, Properties confs,
                                                       HttpServletRequest request) {
         sb.append("<select name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
                 .append(paramName).append("\">");
-        final String paramVal;
-        if ("true".equals(request.getParameter("runScript"))) {
-            paramVal = request.getParameter("scriptParam_" + paramName);
-        } else {
-            paramVal = confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
-        }
+        final String paramVal = getElementDefaultValue(paramName, confs, request);
         final String values = confs.getProperty(String.format("script.param.%s.values", paramName));
         generateStaticOptions(values, paramVal, sb);
         final String dynamicvalues = confs.getProperty(String.format("script.param.%s.dynamicvalues", paramName));
@@ -599,5 +613,12 @@ public class GroovyConsoleHelper {
 
     public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSnippets() {
         return CodeSkeletonsLocator.getSnippets();
+    }
+
+    private static String getElementDefaultValue(String paramName, Properties confs, HttpServletRequest request) {
+        if ("true".equals(request.getParameter("runScript"))) {
+            return request.getParameter("scriptParam_" + paramName);
+        }
+        return confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
     }
 }
