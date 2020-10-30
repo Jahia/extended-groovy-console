@@ -1,0 +1,1 @@
+System.clearProperty("modules.xGroovyConsole.undefinedProp")
