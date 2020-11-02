@@ -1,4 +1,6 @@
-# Extended Groovy Console   
+# Extended Groovy Console 
+This module registers in the tools page an alternative groovy console with additional features.
+  
 * [Using a custom script](#how-to-use-custom) 
 * [Using a predefined script](#how-to-use-predefined) 
   * [Script configuration](#configuration) 
@@ -115,3 +117,6 @@ is defined and equal to `development`:
         log.info("On mute")
     }
         
+Do you want to test it? Just run the below command in the console:
+
+    System.setProperty("modules.xGroovyConsole.display.helloWorld", "true")        
