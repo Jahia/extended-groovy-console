@@ -16,8 +16,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class CodeSkeletonsLocator implements BundleActivator {
 
@@ -38,39 +36,7 @@ public class CodeSkeletonsLocator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         final Bundle bundle = context.getBundle();
         scan("groovySkeletons", skeletons, bundle, new CodeParserCallback());
-        scan("groovySnippets", snippets, bundle, new CodeParserCallback() {
-            @Override
-            public CodeSkeleton getCode(BundleResource br) {
-                String content = null;
-                InputStream is = null;
-                try {
-                    is = br.getInputStream();
-                    final List<String> lines = IOUtils.readLines(is);
-                    final StringBuilder imports = new StringBuilder();
-                    final StringBuilder code = new StringBuilder();
-                    boolean inImports = true;
-                    for (String line : lines) {
-                        if (inImports) {
-                            if (line.trim().startsWith("import ") || StringUtils.isBlank(line)) {
-                                imports.append(line).append("\n");
-                            } else {
-                                inImports = false;
-                            }
-                        }
-                        if (!inImports) {
-                            code.append(line).append("\n");
-                        }
-                    }
-
-                    return new CodeSnippet(br.getFilename(), imports.toString(), code.toString());
-                } catch (IOException e) {
-                    logger.error("", e);
-                } finally {
-                    IOUtils.closeQuietly(is);
-                }
-                return null;
-            }
-        });
+        scan("groovySnippets", snippets, bundle, new SnippetParserCallback());
     }
 
     @Override
@@ -83,44 +49,12 @@ public class CodeSkeletonsLocator implements BundleActivator {
             return;
         while (resourceEnum.hasMoreElements()) {
             final BundleResource bundleResource = new BundleResource(resourceEnum.nextElement(), bundle);
-            list.add(cb.getCode(bundleResource));
+            final CodeSkeleton code = cb.getCode(bundleResource);
+            if (code != null) list.add(code);
         }
     }
 
-    public class CodeSkeleton {
-
-        private String label;
-        private String code;
-
-        public CodeSkeleton(String label, String code) {
-            this.label = label;
-            this.code = code;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public String getCode() {
-            return code;
-        }
-    }
-
-    public class CodeSnippet extends CodeSkeleton {
-
-        private String imports;
-
-        public CodeSnippet(String label, String imports, String code) {
-            super(label, code);
-            this.imports = imports;
-        }
-
-        public String getImports() {
-            return imports;
-        }
-    }
-
-    private class CodeParserCallback {
+    private static class CodeParserCallback {
 
         public CodeSkeleton getCode(BundleResource br) {
             try {
@@ -130,6 +64,39 @@ public class CodeSkeletonsLocator implements BundleActivator {
                 logger.error("", e);
                 return null;
             }
+        }
+    }
+
+    private static class SnippetParserCallback extends CodeParserCallback {
+        @Override
+        public CodeSkeleton getCode(BundleResource br) {
+            InputStream is = null;
+            try {
+                is = br.getInputStream();
+                final List<String> lines = IOUtils.readLines(is);
+                final StringBuilder imports = new StringBuilder();
+                final StringBuilder code = new StringBuilder();
+                boolean inImports = true;
+                for (String line : lines) {
+                    if (inImports) {
+                        if (line.trim().startsWith("import ") || StringUtils.isBlank(line)) {
+                            imports.append(line).append("\n");
+                        } else {
+                            inImports = false;
+                        }
+                    }
+                    if (!inImports) {
+                        code.append(line).append("\n");
+                    }
+                }
+
+                return new CodeSnippet(br.getFilename(), imports.toString(), code.toString());
+            } catch (IOException e) {
+                logger.error("", e);
+            } finally {
+                IOUtils.closeQuietly(is);
+            }
+            return null;
         }
     }
 }

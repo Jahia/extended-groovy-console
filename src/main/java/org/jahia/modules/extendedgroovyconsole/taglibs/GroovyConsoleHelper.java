@@ -48,6 +48,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
 import org.jahia.data.templates.JahiaTemplatesPackage;
+import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeleton;
 import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator;
 import org.jahia.osgi.BundleResource;
 import org.jahia.registries.ServicesRegistry;
@@ -607,11 +608,11 @@ public class GroovyConsoleHelper {
         }
     }
 
-    public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSkeletons() {
+    public static Collection<CodeSkeleton> getCodeSkeletons() {
         return CodeSkeletonsLocator.getSkeletons();
     }
 
-    public static Collection<CodeSkeletonsLocator.CodeSkeleton> getCodeSnippets() {
+    public static Collection<CodeSkeleton> getCodeSnippets() {
         return CodeSkeletonsLocator.getSnippets();
     }
 
