@@ -226,54 +226,16 @@
         <h3>How to use the Groovy console</h3>
 
         <h4>Using a custom script</h4>
-        <p>You can run a custom script here, writing or pasting it into the textarea.</p>
+        <p>You can run a custom script here, writing or pasting it into the textarea. If you write your script directly in the console, some code
+        skeletons &amp; snippets are available to help you.</p>
         <p>If your script has to generate some output, you can use the built in logger: <em>log.info("Some output")</em></p>
 
         <h4>Using a predefined script</h4>
         <p>You can as well package in any of your modules a predefined script, which can then be conveniently run from the console
             without you have to copy and paste it. You still have the possibility to write or paste a custom script.</p>
-        <p>Your predefined scripts have to be defined in a specific folder:
-            <em>src/main/resources/META-INF/groovyConsole</em></p>
-        <p>If some predefined script requires some configurations, then you have to create in the same folder a file with the same name as the script
-            and <em>.properties</em> as an extension. In this file, you can declare and configure the required parameters:</p>
-        <ul>
-            <li><em>script.title</em>: title of the script</li>
-            <li><em>script.description</em>: short description of the script</li>
-            <li><em>script.parameters.names</em>: comma separated list of parameters</li>
-            <li><em>script.param.xxx.type</em>: type of the parameter xxx <br />
-                Allowed values: <em>checkbox</em>, <em>text</em>, <em>choicelist</em><br />
-                Default value: <em>checkbox</em></li>
-            <li><em>script.param.xxx.label</em>: label for the parameter xxx</li>
-            <li><em>script.param.xxx.default</em>: default value of the parameter xxx <br />
-                For a checkbox parameter, the checkbox is unchecked by default, use <em>true</em> as a default value otherwise <br />
-                For a text parameter, the input field is empty by default<br />
-                For a choicelist, the default value is selected<br />
-            </li>
-            <li><em>script.param.xxx.values</em>: list of values for the parameter xxx<br />
-                Effective only if the parameter is of type <em>choicelist</em>
-            </li>
-        </ul>
-
-        <p><strong>Example: helloworld.properties</strong>
-        <pre>
-    script.title=Hello world demo
-    script.description=Tell your name to the script to get a personalized hello message!
-    script.parameters.names=active, name
-    script.param.active.default=true
-    script.param.name.type=text
-    script.param.name.label=User name
-        </pre>
-        </p>
-
-        <p><strong>Example: helloworld.groovy</strong>
-        <pre>
-    if (active) {
-        log.info(String.format("Hello %s!!!", name == null || name.trim().length() == 0 ? "world" : name))
-    } else {
-        log.info("On mute")
-    }
-        </pre>
-        </p>
+        <p>Full documentation available on GitHub:
+            <a href="https://github.com/Jahia/extended-groovy-console#extended-groovy-console" 
+               target="_blank">https://github.com/Jahia/extended-groovy-console</a></p>
     </div>
 </div>
 <c:if test="${not empty scriptContent}">
