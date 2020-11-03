@@ -62,8 +62,9 @@
     <description>This is the custom module (Extended groovy console) for running on a Digital Experience Manager server.</description>
 
     <scm>
-        <connection>scm:dummy:uri</connection>
-        <developerConnection>scm:dummy:uri</developerConnection>
+        <connection>scm:git:git@github.com:Jahia/extended-groovy-console</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/extended-groovy-console</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
