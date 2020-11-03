@@ -24,7 +24,7 @@ Your predefined scripts have to be defined in a specific folder.
 
     src/main/resources/META-INF/extendedGroovyConsole
     
-You can as well define your scripts in `vsrc/main/resources/META-INF/extendedGroovyConsole`.
+You can as well define your scripts in `src/main/resources/META-INF/extendedGroovyConsole`.
 The those scripts would be availabe in both the regular and extended groovy consoles. Be careful 
 to no use any specificity of the extended console then.    
 
