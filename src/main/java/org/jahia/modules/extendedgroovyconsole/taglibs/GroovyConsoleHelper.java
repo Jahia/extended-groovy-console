@@ -617,7 +617,9 @@ public class GroovyConsoleHelper {
     }
 
     private static String getElementDefaultValue(String paramName, Properties confs, HttpServletRequest request) {
-        if ("true".equals(request.getParameter("runScript"))) {
+        final String keepValueAfterSubmit = confs.getProperty(String.format("script.param.%s.keepValueAfterSubmit", paramName));
+        final boolean resetValue = Boolean.FALSE.toString().equalsIgnoreCase(StringUtils.trim(keepValueAfterSubmit));
+        if (!resetValue && "true".equals(request.getParameter("runScript"))) {
             return request.getParameter("scriptParam_" + paramName);
         }
         return confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
