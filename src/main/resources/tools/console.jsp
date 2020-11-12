@@ -176,9 +176,11 @@
 <form id="groovyForm" action="?" method="post">
     <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
     <input type="hidden" id="runScript" name="runScript" value="true" />
+    <%-- // TODO QUARTZ
     <c:if test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
         <input type="checkbox" value="background" name="background" id="background"/>&nbsp;<label for="background" title="Execute the script as a background job (separate thread)">Execute as a background job</label>
     </c:if>
+    --%>
     <c:set var="scripts" value="${tools:getGroovyConsoleScripts()}" />
     <c:if test="${not empty scripts}">
         <p>
@@ -234,7 +236,7 @@
         <p>You can as well package in any of your modules a predefined script, which can then be conveniently run from the console
             without you have to copy and paste it. You still have the possibility to write or paste a custom script.</p>
         <p>Full documentation available on GitHub:
-            <a href="https://github.com/Jahia/extended-groovy-console#extended-groovy-console" 
+            <a href="https://github.com/Jahia/extended-groovy-console#extended-groovy-console"
                target="_blank">https://github.com/Jahia/extended-groovy-console</a></p>
     </div>
 </div>
