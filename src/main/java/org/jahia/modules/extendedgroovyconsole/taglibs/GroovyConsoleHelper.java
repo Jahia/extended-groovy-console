@@ -437,7 +437,7 @@ public class GroovyConsoleHelper {
             sb.append("<h2>").append(title).append("</h2>");
         final String desc = confs.getProperty("script.description");
         if (StringUtils.isNotBlank(desc))
-            sb.append("<div>").append(desc).append("</div>");
+            sb.append("<div class=\"description\">").append(desc).append("</div>");
         final String[] paramNames = StringUtils
                 .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
         if (ArrayUtils.isNotEmpty(paramNames)) {
