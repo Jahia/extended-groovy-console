@@ -45,6 +45,7 @@ In this file, you can declare and configure the required parameters
 * __script.param.xxx.type__: type of the parameter xxx
 * __script.param.xxx.label__: label for the parameter xxx
 * __script.param.xxx.default__: default value of the parameter xxx
+* __script.param.xxx.keepValueAfterSubmit__: if defined and equal to _false_, the parameter is reset to its default value after the script is submit 
 
 **Parameter types**
 
