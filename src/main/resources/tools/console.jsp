@@ -206,20 +206,22 @@
     </c:if>
     <c:choose>
         <c:when test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
+            <c:set var="submitButtonText" value="Execute ([Ctrl+Enter])" />
             <p>${not empty scripts ? 'Or paste' : 'Paste'} here the Groovy code you would like to execute against Jahia:</p>
 
             <p>
                     <textarea rows="25" style="width: 100%" id="text" name="script"
-                              onkeyup="if ((event || window.event).keyCode == 13 && (event || window.event).ctrlKey && confirm(<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
+                              onkeyup="if ((event || window.event).keyCode == 13 && (event || window.event).ctrlKey && confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
             </p>
             <a class="fancybox-link" href="#snippetsArea">Code snippets</a>
         </c:when>
         <c:otherwise>
+            <c:set var="submitButtonText" value="Execute" />
             ${tools:getScriptCustomFormElements(param.scriptURI, pageContext.request)}
         </c:otherwise>
     </c:choose>
     <p>
-        <input type="submit" value="Execute ([Ctrl+Enter])" onclick="if (!confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) { return false; }"/>
+        <input type="submit" value="${submitButtonText}" onclick="if (!confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) { return false; }"/>
     </p>
 </form>
 <%@ include file="gotoIndex.jspf" %>
