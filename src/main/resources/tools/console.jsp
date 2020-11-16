@@ -143,7 +143,7 @@
     <fieldset>
         <legend style="color: blue">Successfully executed in ${took} ms</legend>
         <p><strong>Result:</strong><br/>
-        <pre>${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
+        <pre class="results">${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
         </p>
     </fieldset>
 </c:if>
