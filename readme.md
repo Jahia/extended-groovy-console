@@ -41,6 +41,7 @@ In this file, you can declare and configure the required parameters
 * __script.title__: title of the script
 * __script.description__: short description of the script
 * __script.visibilityCondition__: [visibility condition](#visibility-condition) for the script
+* __script.parameters.display.width__: width of the column displaying the parameters label. Default: _400px_
 * __script.parameters.names__: comma separated list of parameters
 * __script.param.xxx.type__: type of the parameter xxx
 * __script.param.xxx.label__: label for the parameter xxx
