@@ -441,7 +441,8 @@ public class GroovyConsoleHelper {
         final String[] paramNames = StringUtils
                 .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
         if (ArrayUtils.isNotEmpty(paramNames)) {
-            sb.append("<table><colgroup><col><col width=\"60%\"></colgroup>");
+            final String width = confs.getProperty("script.parameters.display.width", "400px");
+            sb.append("<table><colgroup><col width=\"").append(width).append("\"/><col/></colgroup>");
             for (String paramName : paramNames) {
                 final StringBuilder label = new StringBuilder();
                 final StringBuilder input = new StringBuilder();
