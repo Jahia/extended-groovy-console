@@ -20,17 +20,17 @@ If your script has to generate some output, you can use the built in logger:
 You can as well package in any of your modules a predefined script, 
 which can then be conveniently run from the console without you have to copy and paste it.
 
-Your predefined scripts have to be defined in a specific folder.
+Your predefined scripts have to be defined in a specific folder:
 
     src/main/resources/META-INF/extendedGroovyConsole
     
-You can as well define your scripts in `src/main/resources/META-INF/extendedGroovyConsole`.
-The those scripts would be availabe in both the regular and extended groovy consoles. Be careful 
+You can as well define your scripts in `src/main/resources/META-INF/groovyConsole`.
+Those scripts would be available in both the regular and extended groovy consoles. Be careful 
 to no use any specificity of the extended console then.    
 
 ### <a name="configuration"></a>Script configuration
 
-If some predefined script requires some configurations, then you have to create in the same 
+If some predefined script require some configurations, then you have to create in the same 
 folder a file with the same name as the script and .properties as an extension. 
 
     src/main/resources/META-INF/extendedGroovyConsole/myScript.groovy
