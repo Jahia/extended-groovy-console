@@ -124,6 +124,7 @@
                     "org.jahia.tools.groovyConsole", ctx.getWriter());
             bindings.put("log", lw);
             bindings.put("logger", lw);
+            bindings.put("request", request);
             if (isPredefinedScript) {
                 final String[] paramNames = GroovyConsoleHelper.getScriptParamNames(scriptURL);
                 if (paramNames != null)
