@@ -1,7 +1,10 @@
 import org.jahia.services.content.JCRObservationManager
 
-JCRObservationManager.setAllEventListenersDisabled(true)
+try {
+    JCRObservationManager.setAllEventListenersDisabled(true)
 
-// write your code here
+    // write your code here
 
-JCRObservationManager.setAllEventListenersDisabled(false)
+} finally {
+    JCRObservationManager.setAllEventListenersDisabled(false)
+}
