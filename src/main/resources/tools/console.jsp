@@ -55,9 +55,13 @@
             $.fancybox.close()
         }
 
-        function copySnippet(id) {
+        function copyText(id) {
             let copyText = document.getElementById(id);
             navigator.clipboard.writeText(copyText.innerText);
+        }
+
+        function copySnippet(id) {
+            copyText(id)
             $.fancybox.close();
         }
     </script>
@@ -140,8 +144,9 @@
     %>
     <fieldset>
         <legend style="color: blue">Successfully executed in ${took} ms</legend>
-        <p><strong>Result:</strong><br/>
-        <pre class="results">${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
+        <br><strong>Result:</strong><br />
+        <pre class="results" id="scriptOutput">${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
+        <br /><button onclick="copyText('scriptOutput')">Copy to clipboard</button>
         </p>
     </fieldset>
 </c:if>
