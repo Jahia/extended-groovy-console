@@ -146,7 +146,7 @@
         <legend style="color: blue">Successfully executed in ${took} ms</legend>
         <br><strong>Result:</strong><br />
         <pre class="results" id="scriptOutput">${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
-        <br /><button onclick="copyText('scriptOutput')">Copy to clipboard</button>
+        <button onclick="copyText('scriptOutput')">Copy to clipboard</button>
         </p>
     </fieldset>
 </c:if>
