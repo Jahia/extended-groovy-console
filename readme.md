@@ -122,3 +122,10 @@ is defined and equal to `development`:
 Do you want to test it? Just run the below command in the console:
 
     System.setProperty("modules.xGroovyConsole.display.helloWorld", "true")        
+
+## <a name="security"></a>Security
+If you have secured your Jahia server according to the page
+https://academy.jahia.com/training-kb/knowledge-base/jahia-technical-urls-to-block
+, you have to add the following pattern to the list:
+
+    /modules/extended-groovy-console/tools/*
