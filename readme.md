@@ -5,6 +5,7 @@ This module registers in the tools page an alternative groovy console with addit
 * [Using a predefined script](#how-to-use-predefined) 
   * [Script configuration](#configuration) 
   * [Example](#example) 
+* [Security](#security)
 
 
 ## <a name="how-to-use-custom"></a>Using a custom script
