@@ -44,6 +44,7 @@
 package org.jahia.modules.extendedgroovyconsole.taglibs;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
@@ -61,12 +62,16 @@ import org.jahia.settings.SettingsBean;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -389,6 +394,28 @@ public class GroovyConsoleHelper {
                 logger.error("", e);
             }
         }
+    }
+
+    public static String getGroovyConsoleScript(String uri) {
+        try {
+            return getContent(new UrlResource(uri), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("Impossible to load the script", e);
+            return String.format("log.info(\"Failed to load the script at %s\")", uri);
+        }
+    }
+
+    public static String getContent(Resource resource, Charset charset) throws IOException {
+        String content = null;
+        InputStream is = null;
+        try {
+            is = resource.getInputStream();
+            content = IOUtils.toString(is, charset);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+
+        return content;
     }
 
     private static String getProperty(String name) {
