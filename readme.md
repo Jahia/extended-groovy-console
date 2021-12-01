@@ -27,7 +27,9 @@ Your predefined scripts have to be defined in a specific folder:
     
 You can as well define your scripts in `src/main/resources/META-INF/groovyConsole`.
 Those scripts would be available in both the regular and extended groovy consoles. Be careful 
-to no use any specificity of the extended console then.    
+to no use any specificity of the extended console then.
+
+To avoid encoding issues, prefer UTF-8 encoding for your scripts.
 
 ### <a name="configuration"></a>Script configuration
 
@@ -37,7 +39,7 @@ folder a file with the same name as the script and .properties as an extension.
     src/main/resources/META-INF/extendedGroovyConsole/myScript.groovy
     src/main/resources/META-INF/extendedGroovyConsole/myScript.properties
 
-In this file, you can declare and configure the required parameters
+In this file, you can declare and configure the required parameters (simple example [here](#example-conf))
 
 * __script.title__: title of the script
 * __script.description__: short description of the script
@@ -102,7 +104,7 @@ is defined and equal to `development`:
 
 ### <a name="example"></a>Example
 
-**helloworld.properties**
+**<a name="example-conf"></a>helloworld.properties**
 
     script.title=Hello world demo
     script.description=Tell your name to the script to get a personalized hello message!
