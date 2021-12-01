@@ -2,6 +2,7 @@ package org.jahia.modules.extendedgroovyconsole.osgi;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper;
 import org.jahia.osgi.BundleResource;
 import org.jahia.utils.FileUtils;
 import org.osgi.framework.Bundle;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -58,7 +60,7 @@ public class CodeSkeletonsLocator implements BundleActivator {
 
         public CodeSkeleton getCode(BundleResource br) {
             try {
-                final String code = FileUtils.getContent(br);
+                final String code = GroovyConsoleHelper.getContent(br, StandardCharsets.UTF_8);
                 return new CodeSkeleton(br.getFilename(), code);
             } catch (IOException e) {
                 logger.error("", e);
@@ -73,7 +75,7 @@ public class CodeSkeletonsLocator implements BundleActivator {
             InputStream is = null;
             try {
                 is = br.getInputStream();
-                final List<String> lines = IOUtils.readLines(is);
+                final List<String> lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
                 final StringBuilder imports = new StringBuilder();
                 final StringBuilder code = new StringBuilder();
                 boolean inImports = true;

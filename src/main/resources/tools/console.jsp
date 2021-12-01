@@ -77,7 +77,7 @@
 %>
 <c:if test="${not empty param.scriptURI && param.scriptURI != 'custom'}">
     <%
-        pageContext.setAttribute("scriptContent", org.jahia.utils.FileUtils.getContent(new UrlResource(request.getParameter("scriptURI"))));
+        pageContext.setAttribute("scriptContent", GroovyConsoleHelper.getGroovyConsoleScript(request.getParameter("scriptURI")));
     %>
 </c:if>
 <c:if test="${not empty param.runScript and param.runScript eq 'true'}">
