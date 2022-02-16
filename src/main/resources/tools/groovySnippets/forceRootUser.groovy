@@ -9,8 +9,12 @@ if (!realUser.isRoot()) {
     JCRSessionFactory.getInstance().setCurrentUser(rootUser.getJahiaUser())
 }
 
-// write your code here
+try {
 
-if (!realUser.isRoot()) {
-    JCRSessionFactory.getInstance().setCurrentUser(realUser)
+    // write your code here
+
+} finally {
+    if (!realUser.isRoot()) {
+        JCRSessionFactory.getInstance().setCurrentUser(realUser)
+    }
 }

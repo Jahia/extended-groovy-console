@@ -75,6 +75,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for the Groovy Console.
@@ -488,21 +489,13 @@ public class GroovyConsoleHelper {
      * Returns an array of parameter names for the specified script or <code>null</code> if the script has no parameters.
      *
      * @param scriptURI the script URI to get parameter names for
-     * @return an array of parameter names for the specified script or <code>null</code> if the script has no parameters
+     * @return a Map where the keys are the parameter names for the specified script, and the values their related type, or <code>null</code> if the script has no parameters
      */
-    public static String[] getScriptParamNames(String scriptURI) {
-        try {
-            final UrlResource resource = new UrlResource(
-                    StringUtils.substringBeforeLast(scriptURI, ".groovy") + ".properties");
-            if (resource.exists()) {
-                final Properties confs = new Properties();
-                confs.load(resource.getInputStream());
-                return StringUtils.split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
-            }
-        } catch (IOException e) {
-            logger.error("An error occured while reading the configurations for the script " + scriptURI, e);
-        }
-        return null;
+    public static Map<String,String> getScriptParamNames(String scriptURI) {
+        final Properties confs = getScriptConfigurations(scriptURI);
+        if (confs == null) return null;
+        return Arrays.stream(StringUtils.split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ","))
+                .collect(Collectors.toMap(name -> name, name -> confs.getProperty(String.format("script.param.%s.type", name), "checkbox")));
     }
 
     private static boolean generateFormElement(String paramName, StringBuilder input, Properties confs,

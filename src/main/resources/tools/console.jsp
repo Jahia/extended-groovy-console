@@ -21,6 +21,7 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.jahia.modules.extendedgroovyconsole.LoggerWrapper" %>
 <%@ page import="org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper" %>
+<%@ page import="java.util.Map" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@taglib prefix="functions" uri="http://www.jahia.org/tags/functions" %>
@@ -130,10 +131,13 @@
             bindings.put("logger", lw);
             bindings.put("request", request);
             if (isPredefinedScript) {
-                final String[] paramNames = GroovyConsoleHelper.getScriptParamNames(scriptURL);
-                if (paramNames != null)
-                    for (String paramName : paramNames) {
-                        bindings.put(paramName, request.getParameter("scriptParam_" + paramName));
+                final Map<String, String> params = GroovyConsoleHelper.getScriptParamNames(scriptURL);
+                if (params != null)
+                    for (String paramName : params.keySet()) {
+                        final String reqParam = request.getParameter("scriptParam_" + paramName);
+                        final Object val = StringUtils.equals(params.get(paramName), "checkbox") ?
+                                StringUtils.equalsIgnoreCase(reqParam, "on") : reqParam;
+                        bindings.put(paramName, val);
                     }
             }
             ctx.setBindings(bindings, ScriptContext.ENGINE_SCOPE);

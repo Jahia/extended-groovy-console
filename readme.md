@@ -12,7 +12,7 @@ This module registers in the tools page an alternative groovy console with addit
 
 You can run a custom script here, writing or pasting it into the textarea.
 
-If your script has to generate some output, you can use the built in logger: 
+If your script has to generate some output, you can use the built-in logger: 
 
     log.info("Some output")
 
