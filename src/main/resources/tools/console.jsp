@@ -70,6 +70,15 @@
             copyText(id)
             $.fancybox.close();
         }
+
+        function saveRamScript() {
+            if (document.getElementById("ramScriptID").value.trim().length === 0) {
+                alert("You need to set an ID to your script")
+                return false
+            }
+            document.getElementById("runScript").setAttribute("value", "save")
+            document.getElementById('groovyForm').submit()
+        }
     </script>
 </head>
 <body>
@@ -85,6 +94,9 @@
     <%
         pageContext.setAttribute("scriptContent", GroovyConsoleHelper.getGroovyConsoleScript(request.getParameter("scriptURI")));
     %>
+</c:if>
+<c:if test="${not empty param.runScript and param.runScript eq 'save'}">
+    <%= GroovyConsoleHelper.saveRamScript(request) %>
 </c:if>
 <c:if test="${not empty param.runScript and param.runScript eq 'true'}">
     <%
@@ -202,7 +214,7 @@
                 <c:forEach items="${scripts}" var="bundle">
                     <optgroup label="${bundle.key}">
                         <c:forEach items="${bundle.value}" var="script">
-                            <%--@elvariable id="script" type="org.jahia.osgi.BundleResource"--%>
+                            <%--@elvariable id="script" type="org.jahia.modules.extendedgroovyconsole.taglibs.GroovyScriptWrapper"--%>
                             <c:remove var="currentScriptIsSelected" />
                             <c:if test="${script.URI eq param.scriptURI}"><c:set var="currentScriptIsSelected">selected='selected'</c:set><c:set var="currentScriptFilename" value="${script.filename}"/></c:if>
                             <option value="${script.URI}" class="scriptURISelection" ${currentScriptIsSelected}><c:out value="${script.filename}" /></option>
@@ -235,6 +247,13 @@
     <p>
         <input type="submit" value="${submitButtonText}" onclick="if (!confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) { return false; }"/>
     </p>
+    <c:if test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
+        <fieldset>
+            <legend>Save as RAM script</legend>
+            <label for="ramScriptID">ID: </label><input type="text" name="ramScriptID" id="ramScriptID" />
+            <input type="button" value="Save" onclick="saveRamScript()" />
+        </fieldset>
+    </c:if>
 </form>
 <%@ include file="gotoIndex.jspf" %>
 <div style="display: none;">
