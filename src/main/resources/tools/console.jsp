@@ -250,7 +250,7 @@
     <c:if test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
         <fieldset>
             <legend>Save as RAM script</legend>
-            <label for="ramScriptID">ID: </label><input type="text" name="ramScriptID" id="ramScriptID" />
+            <label for="ramScriptID">ID: </label><input type="text" name="ramScriptID" id="ramScriptID" onkeydown="if (event.key === 'Enter') {event.preventDefault(); saveRamScript(); return false}" />
             <input type="button" value="Save" onclick="saveRamScript()" />
         </fieldset>
     </c:if>
