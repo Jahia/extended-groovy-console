@@ -5,6 +5,7 @@ This module registers in the tools page an alternative groovy console with addit
 * [Using a predefined script](#how-to-use-predefined) 
   * [Script configuration](#configuration) 
   * [Example](#example) 
+* [Using a custom script with configurations](#ram-script)
 * [Security](#security)
 
 
@@ -126,7 +127,33 @@ Do you want to test it? Just run the below command in the console:
 
     System.setProperty("modules.xGroovyConsole.display.helloWorld", "true")        
 
+## <a name="ram-script"></a>Using a custom script with configurations
+
+If you need to make a custom script configurable, like the predefined ones, you can embed your configuration declaration
+as some comments in the script, and save it to add it to the list of predefined scripts.
+
+The configurations use the same format as the one for the predefined scripts.
+
+After writing or pasting your script in the code area, give it an ID and click on `save`.
+
+**Example**
+
+    if (active) {
+        log.info(String.format("Hello %s!!!", name == null || name.trim().length() == 0 ? "world" : name))
+    } else {
+        log.info("On mute")
+    }
+
+    // Script configurations
+    //script.title=Hello world demo
+    //script.description=Tell your name to the script to get a personalized hello message!
+    //script.parameters.names=active, name
+    //script.param.active.default=true
+    //script.param.name.type=text
+    //script.param.name.label=User name
+
 ## <a name="security"></a>Security
+
 If you have secured your Jahia server according to the page
 https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block
 , you have to add the following pattern to the list:
