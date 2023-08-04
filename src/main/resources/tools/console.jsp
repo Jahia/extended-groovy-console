@@ -57,13 +57,27 @@
         }
 
         function copyText(id) {
-            let copyText = document.getElementById(id);
-            navigator.clipboard.writeText(copyText.innerText);
+            const cbd = navigator.clipboard;
+            if (cbd === undefined) {
+                alert("Your browser version doesn't support the clipboard object, impossible to copy the text");
+                return;
+            }
+            const copyText = document.getElementById(id);
+            cbd.writeText(copyText.innerText);
         }
 
         function copySnippet(id) {
             copyText(id)
             $.fancybox.close();
+        }
+
+        function saveRamScript() {
+            if (document.getElementById("ramScriptID").value.trim().length === 0) {
+                alert("You need to set an ID to your script")
+                return false
+            }
+            document.getElementById("runScript").setAttribute("value", "save")
+            document.getElementById('groovyForm').submit()
         }
     </script>
 </head>
@@ -76,10 +90,24 @@
     try {
         engine = ScriptEngineUtils.getInstance().scriptEngine("groovy");
 %>
-<c:if test="${not empty param.scriptURI && param.scriptURI != 'custom'}">
+<c:choose>
+    <c:when test="${param.runScript eq 'save'}">
+        <c:set var="currentScript"><%=GroovyConsoleHelper.RAM_SCRIPT_URI_PREFIX%>${param.ramScriptID}</c:set>
+    </c:when>
+    <c:when test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
+        <c:remove var="currentScript"/>
+    </c:when>
+    <c:otherwise>
+        <c:set var="currentScript" value="${param.scriptURI}" />
+    </c:otherwise>
+</c:choose>
+<c:if test="${not empty currentScript}">
     <%
-        pageContext.setAttribute("scriptContent", GroovyConsoleHelper.getGroovyConsoleScript(request.getParameter("scriptURI")));
+        pageContext.setAttribute("scriptContent", GroovyConsoleHelper.getGroovyConsoleScript((String)pageContext.getAttribute("currentScript")));
     %>
+</c:if>
+<c:if test="${not empty param.runScript and param.runScript eq 'save'}">
+    <%= GroovyConsoleHelper.saveRamScript(request) %>
 </c:if>
 <c:if test="${not empty param.runScript and param.runScript eq 'true'}">
     <%
@@ -193,13 +221,14 @@
         <p>
             Chose a pre-defined script to be executed:
             <select name="scriptURI" onchange="document.getElementById('runScript').setAttribute('value','false'); document.getElementById('groovyForm').submit();">
-                <option value="custom" class="scriptURISelection">---</option>
+                <c:if test="${empty currentScript}"><c:set var="currentScriptIsSelected">selected='selected'</c:set></c:if>
+                <option value="custom" class="scriptURISelection" ${currentScriptIsSelected}>---</option>
                 <c:forEach items="${scripts}" var="bundle">
                     <optgroup label="${bundle.key}">
                         <c:forEach items="${bundle.value}" var="script">
-                            <%--@elvariable id="script" type="org.jahia.osgi.BundleResource"--%>
+                            <%--@elvariable id="script" type="org.jahia.modules.extendedgroovyconsole.taglibs.GroovyScriptWrapper"--%>
                             <c:remove var="currentScriptIsSelected" />
-                            <c:if test="${script.URI eq param.scriptURI}"><c:set var="currentScriptIsSelected">selected='selected'</c:set><c:set var="currentScriptFilename" value="${script.filename}"/></c:if>
+                            <c:if test="${script.URI eq currentScript}"><c:set var="currentScriptIsSelected">selected='selected'</c:set><c:set var="currentScriptFilename" value="${script.filename}"/></c:if>
                             <option value="${script.URI}" class="scriptURISelection" ${currentScriptIsSelected}><c:out value="${script.filename}" /></option>
                         </c:forEach>
                     </optgroup>
@@ -212,24 +241,31 @@
         </p>
     </c:if>
     <c:choose>
-        <c:when test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
+        <c:when test="${empty currentScript}">
             <c:set var="submitButtonText" value="Execute ([Ctrl+Enter])" />
             <p>${not empty scripts ? 'Or paste' : 'Paste'} here the Groovy code you would like to execute against Jahia:</p>
 
             <p>
                     <textarea rows="25" style="width: 100%" id="text" name="script"
-                              onkeyup="if ((event || window.event).keyCode == 13 && (event || window.event).ctrlKey && confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
+                              onkeyup="if (event.key === 'Enter' && event.ctrlKey && confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
             </p>
             <a class="fancybox-link" href="#snippetsArea">Code snippets</a>
         </c:when>
         <c:otherwise>
             <c:set var="submitButtonText" value="Execute" />
-            ${tools:getScriptCustomFormElements(param.scriptURI, pageContext.request)}
+            ${tools:getScriptCustomFormElements(currentScript, pageContext.request)}
         </c:otherwise>
     </c:choose>
     <p>
         <input type="submit" value="${submitButtonText}" onclick="if (!confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) { return false; }"/>
     </p>
+    <c:if test="${empty currentScript}">
+        <fieldset>
+            <legend>Save as RAM script</legend>
+            <label for="ramScriptID">ID: </label><input type="text" name="ramScriptID" id="ramScriptID" onkeydown="if (event.key === 'Enter') {event.preventDefault(); saveRamScript(); return false}" />
+            <input type="button" value="Save" onclick="saveRamScript()" />
+        </fieldset>
+    </c:if>
 </form>
 <%@ include file="gotoIndex.jspf" %>
 <div style="display: none;">

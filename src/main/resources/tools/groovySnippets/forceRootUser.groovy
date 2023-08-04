@@ -4,7 +4,8 @@ import org.jahia.services.usermanager.JahiaUser
 import org.jahia.services.usermanager.JahiaUserManagerService
 
 JahiaUser realUser = JCRSessionFactory.getInstance().getCurrentUser()
-if (!realUser.isRoot()) {
+boolean changeUser = realUser == null || !realUser.isRoot()
+if (changeUser) {
     JCRUserNode rootUser = JahiaUserManagerService.getInstance().lookupRootUser()
     JCRSessionFactory.getInstance().setCurrentUser(rootUser.getJahiaUser())
 }
@@ -14,7 +15,7 @@ try {
     // write your code here
 
 } finally {
-    if (!realUser.isRoot()) {
+    if (changeUser) {
         JCRSessionFactory.getInstance().setCurrentUser(realUser)
     }
 }

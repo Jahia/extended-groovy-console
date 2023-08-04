@@ -84,6 +84,10 @@ public class GroovyConsoleHelper {
 
     public static final String WARN_MSG = "WARNING: You are about to execute a script, which can manipulate the repository data or execute services in Jahia. Are you sure, you want to continue?";
     private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleHelper.class);
+    private static final Map<String, String> ramScripts = new HashMap<>();
+    public static final String RAM_SCRIPT_URI_PREFIX = "ramScript://";
+    public static final String JAVA_COMMENTS_PREFIX = "//";
+    public static final String SCRIPT_CONFIGURATIONS_SECTION_BEGIN = JAVA_COMMENTS_PREFIX + " Script configurations";
 
     public static StringBuilder generateScriptSkeleton() {
 
@@ -350,13 +354,13 @@ public class GroovyConsoleHelper {
      *
      * @return a collection of BundleResource, representing scripts, which are found in all active module bundles
      */
-    public static Map<String, Collection<BundleResource>> getGroovyConsoleScripts() {
-        final Map<String, Collection<BundleResource>> scripts = new TreeMap<>();
+    public static Map<String, Collection<GroovyScriptWrapper>> getGroovyConsoleScripts() {
+        final Map<String, Collection<GroovyScriptWrapper>> scripts = new TreeMap<>();
         for (final JahiaTemplatesPackage aPackage : ServicesRegistry.getInstance().getJahiaTemplateManagerService()
                 .getAvailableTemplatePackages()) {
             final Bundle bundle = aPackage.getBundle();
             if (bundle != null) {
-                final TreeSet<BundleResource> bundleScripts = new TreeSet<>(Comparator.comparing(UrlResource::getFilename));
+                final TreeSet<GroovyScriptWrapper> bundleScripts = new TreeSet<>(Comparator.comparing(GroovyScriptWrapper::getFilename));
                 scanGroovyConsoleScripts(bundle, "groovyConsole", bundleScripts);
                 scanGroovyConsoleScripts(bundle, "extendedGroovyConsole", bundleScripts);
                 if (CollectionUtils.isNotEmpty(bundleScripts)) {
@@ -364,10 +368,14 @@ public class GroovyConsoleHelper {
                 }
             }
         }
+        if (!ramScripts.isEmpty()) {
+            final Collection<GroovyScriptWrapper> ramScriptsList = ramScripts.keySet().stream().map(key -> new GroovyScriptWrapper(RAM_SCRIPT_URI_PREFIX + key, key)).collect(Collectors.toList());
+            scripts.put("RAM scripts", ramScriptsList);
+        }
         return scripts;
     }
 
-    private static void scanGroovyConsoleScripts(Bundle bundle, String folder, Collection<BundleResource> scripts) {
+    private static void scanGroovyConsoleScripts(Bundle bundle, String folder, Collection<GroovyScriptWrapper> scripts) {
         final Enumeration<URL> resourceEnum = bundle.findEntries(String.format("META-INF/%s", folder), "*.groovy", false);
         if (resourceEnum == null)
             return;
@@ -390,7 +398,7 @@ public class GroovyConsoleHelper {
                     }
                 }
                 if (scriptVisible)
-                    scripts.add(bundleResource);
+                    scripts.add(new GroovyScriptWrapper(bundleResource.getURI().toString(), bundleResource.getFilename()));
             } catch (IOException e) {
                 logger.error("", e);
             }
@@ -399,10 +407,14 @@ public class GroovyConsoleHelper {
 
     public static String getGroovyConsoleScript(String uri) {
         try {
-            return getContent(new UrlResource(uri), StandardCharsets.UTF_8);
+            if (StringUtils.startsWith(uri, RAM_SCRIPT_URI_PREFIX)) {
+                return ramScripts.get(uri.substring(RAM_SCRIPT_URI_PREFIX.length()));
+            } else {
+                return getContent(new UrlResource(uri), StandardCharsets.UTF_8);
+            }
         } catch (IOException e) {
             logger.error("Impossible to load the script", e);
-            return String.format("log.info(\"Failed to load the script at %s\")", uri);
+            return null;
         }
     }
 
@@ -428,6 +440,12 @@ public class GroovyConsoleHelper {
         if (StringUtils.isBlank(scriptURI)) {
             return null;
         }
+
+        final Properties inlineConfigurations = getScriptInlineConfigurations(scriptURI);
+        if (inlineConfigurations != null) return inlineConfigurations;
+
+        if (StringUtils.startsWith(scriptURI, RAM_SCRIPT_URI_PREFIX)) return null;
+
         try {
             final UrlResource resource = new UrlResource(
                     String.format("%s.properties", StringUtils.substringBeforeLast(scriptURI, ".groovy")));
@@ -439,6 +457,28 @@ public class GroovyConsoleHelper {
             logger.error("An error occured while reading the configurations for the script " + scriptURI, ioe);
         }
         return null;
+    }
+
+    private static Properties getScriptInlineConfigurations(String scriptURI) {
+        final String script = getGroovyConsoleScript(scriptURI);
+        if (StringUtils.isBlank(script)) return null;
+
+        final Properties properties = new Properties();
+        boolean isConfigSection = false;
+        for (String line : script.split("\n")) {
+            if (isConfigSection) {
+                if (StringUtils.startsWith(line.trim(), JAVA_COMMENTS_PREFIX)) {
+                    final String[] prop = StringUtils.split(line.trim().substring(2), "=", 2);
+                    if (prop.length != 2) continue;
+                    properties.put(prop[0].trim(), prop[1].trim());
+                }
+            } else if (StringUtils.startsWith(line.trim(), SCRIPT_CONFIGURATIONS_SECTION_BEGIN)) {
+                isConfigSection = true;
+            }
+        }
+
+        if (properties.isEmpty()) return null;
+        return properties;
     }
 
     /**
@@ -644,5 +684,20 @@ public class GroovyConsoleHelper {
             return request.getParameter("scriptParam_" + paramName);
         }
         return confs.getProperty(String.format("script.param.%s.default", paramName), "").trim();
+    }
+
+    public static String saveRamScript(HttpServletRequest request) {
+        final String scriptID = request.getParameter("ramScriptID");
+        if (StringUtils.isBlank(scriptID)) return "The script ID is missing";
+        final String scriptContent = request.getParameter("script");
+        if (StringUtils.isBlank(scriptContent)) return "The script is empty";
+
+        if (ramScripts.put(scriptID, scriptContent) == null) {
+            logger.info("Saved the script [{}] in memory", scriptID);
+        } else {
+            logger.info("Updated the script [{}] in memory", scriptID);
+        }
+
+        return StringUtils.EMPTY;
     }
 }

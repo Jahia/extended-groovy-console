@@ -5,6 +5,7 @@ This module registers in the tools page an alternative groovy console with addit
 * [Using a predefined script](#how-to-use-predefined) 
   * [Script configuration](#configuration) 
   * [Example](#example) 
+* [Using a custom script with configurations](#ram-script)
 * [Security](#security)
 
 
@@ -27,14 +28,14 @@ Your predefined scripts have to be defined in a specific folder:
     
 You can as well define your scripts in `src/main/resources/META-INF/groovyConsole`.
 Those scripts would be available in both the regular and extended groovy consoles. Be careful 
-to no use any specificity of the extended console then.
+to not use any specificity of the extended console then.
 
-To avoid encoding issues, prefer UTF-8 encoding for your scripts.
+To avoid encoding issues, prefer `UTF-8` encoding for your scripts.
 
 ### <a name="configuration"></a>Script configuration
 
 If some predefined script require some configurations, then you have to create in the same 
-folder a file with the same name as the script and .properties as an extension. 
+folder a file with the same name as the script and `.properties` as an extension. 
 
     src/main/resources/META-INF/extendedGroovyConsole/myScript.groovy
     src/main/resources/META-INF/extendedGroovyConsole/myScript.properties
@@ -126,9 +127,35 @@ Do you want to test it? Just run the below command in the console:
 
     System.setProperty("modules.xGroovyConsole.display.helloWorld", "true")        
 
+## <a name="ram-script"></a>Using a custom script with configurations
+
+If you need to make a custom script configurable, like the predefined ones, you can embed your configuration declaration
+as some comments in the script, and save it to add it to the list of predefined scripts.
+
+The configurations use the same format as the one for the predefined scripts.
+
+After writing or pasting your script in the code area, give it an ID and click on `save`.
+
+**Example**
+
+    if (active) {
+        log.info(String.format("Hello %s!!!", name == null || name.trim().length() == 0 ? "world" : name))
+    } else {
+        log.info("On mute")
+    }
+
+    // Script configurations
+    //script.title=Hello world demo
+    //script.description=Tell your name to the script to get a personalized hello message!
+    //script.parameters.names=active, name
+    //script.param.active.default=true
+    //script.param.name.type=text
+    //script.param.name.label=User name
+
 ## <a name="security"></a>Security
+
 If you have secured your Jahia server according to the page
-https://academy.jahia.com/training-kb/knowledge-base/jahia-technical-urls-to-block
+https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block
 , you have to add the following pattern to the list:
 
     /modules/extended-groovy-console/tools/*
