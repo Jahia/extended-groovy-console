@@ -57,8 +57,13 @@
         }
 
         function copyText(id) {
-            let copyText = document.getElementById(id);
-            navigator.clipboard.writeText(copyText.innerText);
+            const cbd = navigator.clipboard;
+            if (cbd === undefined) {
+                alert("Your browser version doesn't support the clipboard object, impossible to copy the text");
+                return;
+            }
+            const copyText = document.getElementById(id);
+            cbd.writeText(copyText.innerText);
         }
 
         function copySnippet(id) {
