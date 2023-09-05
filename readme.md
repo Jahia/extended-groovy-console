@@ -47,9 +47,9 @@ In this file, you can declare and configure the required parameters (simple exam
 * __script.visibilityCondition__: [visibility condition](#visibility-condition) for the script
 * __script.parameters.display.width__: width of the column displaying the parameters label. Default: `400px`
 * __script.parameters.names__: comma separated list of parameters
-* __script.param.xxx.type__: type of the parameter `xxx`
-* __script.param.xxx.label__: label for the parameter `xxx`
-* __script.param.xxx.default__: default value of the parameter `xxx`
+* __script.param.xxx.type__: type of the parameter _xxx_
+* __script.param.xxx.label__: label for the parameter _xxx_
+* __script.param.xxx.default__: default value of the parameter _xxx_
 * __script.param.xxx.keepValueAfterSubmit__: if defined and equal to `false`, the parameter is reset to its default value after the script is submitted 
 
 **Parameter types**
@@ -134,7 +134,7 @@ as some comments in the script, and save it to add it to the list of predefined 
 
 The configurations use the same format as the one for the predefined scripts.
 
-After writing or pasting your script in the code area, give it an ID and click on `save`.
+After writing or pasting your script in the code area, give it an ID and click on _"Save"_.
 
 **Example**
 
