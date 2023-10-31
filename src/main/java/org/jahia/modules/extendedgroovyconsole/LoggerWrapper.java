@@ -134,7 +134,7 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
     }
 
     private void out(String format, Object[] argArray, Throwable t) {
-        out.println(argArray != null ? MessageFormatter.arrayFormat(format, argArray) : format);
+        out.println(argArray != null ? MessageFormatter.arrayFormat(format, argArray).getMessage() : format);
 
         if (t != null) {
             out.println(t.getMessage());
