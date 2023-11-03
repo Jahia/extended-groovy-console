@@ -44,6 +44,7 @@
 package org.jahia.modules.extendedgroovyconsole.taglibs;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -67,6 +68,7 @@ import org.springframework.core.io.UrlResource;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -408,7 +410,12 @@ public class GroovyConsoleHelper {
     public static String getGroovyConsoleScript(String uri) {
         try {
             if (StringUtils.startsWith(uri, RAM_SCRIPT_URI_PREFIX)) {
-                return ramScripts.get(uri.substring(RAM_SCRIPT_URI_PREFIX.length()));
+                final String content = ramScripts.get(uri.substring(RAM_SCRIPT_URI_PREFIX.length()));
+                if (StringUtils.startsWith(content, "localfs:")) {
+                    final File file = new File(content.trim().substring("localfs:".length()));
+                    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                }
+                return content;
             } else {
                 return getContent(new UrlResource(uri), StandardCharsets.UTF_8);
             }
