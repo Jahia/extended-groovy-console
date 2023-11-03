@@ -34,7 +34,7 @@ To avoid encoding issues, prefer `UTF-8` encoding for your scripts.
 
 ### <a name="configuration"></a>Script configuration
 
-If some predefined script require some configurations, then you have to create in the same 
+If a predefined script requires some configurations, then you have to create in the same 
 folder a file with the same name as the script and `.properties` as an extension. 
 
     src/main/resources/META-INF/extendedGroovyConsole/myScript.groovy
@@ -45,21 +45,21 @@ In this file, you can declare and configure the required parameters (simple exam
 * __script.title__: title of the script
 * __script.description__: short description of the script
 * __script.visibilityCondition__: [visibility condition](#visibility-condition) for the script
-* __script.parameters.display.width__: width of the column displaying the parameters label. Default: _400px_
+* __script.parameters.display.width__: width of the column displaying the parameters label. Default: `400px`
 * __script.parameters.names__: comma separated list of parameters
-* __script.param.xxx.type__: type of the parameter xxx
-* __script.param.xxx.label__: label for the parameter xxx
-* __script.param.xxx.default__: default value of the parameter xxx
-* __script.param.xxx.keepValueAfterSubmit__: if defined and equal to _false_, the parameter is reset to its default value after the script is submit 
+* __script.param.xxx.type__: type of the parameter _xxx_
+* __script.param.xxx.label__: label for the parameter _xxx_
+* __script.param.xxx.default__: default value of the parameter _xxx_
+* __script.param.xxx.keepValueAfterSubmit__: if defined and equal to `false`, the parameter is reset to its default value after the script is submitted 
 
 **Parameter types**
 
-__Allowed values__: checkbox, text, textarea, choicelist  \
-__Default value__: checkbox
+__Allowed values__: `checkbox`, `text`, `textarea`, `choicelist`  \
+__Default value__: `checkbox`
 
 #### Parameter type: checkbox
 
-For a checkbox parameter, the checkbox is unchecked by default, use _true_ as a default value otherwise
+For a checkbox parameter, the checkbox is unchecked by default, use `true` as a default value otherwise
 
 #### Parameter type: text
 
@@ -134,7 +134,7 @@ as some comments in the script, and save it to add it to the list of predefined 
 
 The configurations use the same format as the one for the predefined scripts.
 
-After writing or pasting your script in the code area, give it an ID and click on `save`.
+After writing or pasting your script in the code area, give it an ID and click on _"Save"_.
 
 **Example**
 
