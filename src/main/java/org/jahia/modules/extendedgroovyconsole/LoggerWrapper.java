@@ -172,4 +172,33 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
         super.warn(msg, t);
     }
 
+    @Override
+    public void debug(String msg) {
+        out(msg, null, null);
+        super.debug(msg);
+    }
+
+    @Override
+    public void debug(String format, Object arg) {
+        out(format, new Object[] { arg }, null);
+        super.debug(format, arg);
+    }
+
+    @Override
+    public void debug(String format, Object arg1, Object arg2) {
+        out(format, new Object[] { arg1, arg2 }, null);
+        super.debug(format, arg1, arg2);
+    }
+
+    @Override
+    public void debug(String format, Object[] argArray) {
+        out(format, argArray, null);
+        super.debug(format, argArray);
+    }
+
+    @Override
+    public void debug(String msg, Throwable t) {
+        out(msg, null, t);
+        super.debug(msg, t);
+    }
 }
