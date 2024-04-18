@@ -71,30 +71,35 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
 
     @Override
     public void error(String msg) {
+        if (!isErrorEnabled()) return;
         out(msg, null, null);
         super.error(msg);
     }
 
     @Override
     public void error(String format, Object arg) {
+        if (!isErrorEnabled()) return;
         out(format, new Object[] { arg }, null);
         super.error(format, arg);
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
+        if (!isErrorEnabled()) return;
         out(format, new Object[] { arg1, arg2 }, null);
         super.error(format, arg1, arg2);
     }
 
     @Override
     public void error(String format, Object[] argArray) {
+        if (!isErrorEnabled()) return;
         out(format, argArray, null);
         super.error(format, argArray);
     }
 
     @Override
     public void error(String msg, Throwable t) {
+        if (!isErrorEnabled()) return;
         out(msg, null, t);
         super.error(msg, t);
     }
@@ -105,30 +110,35 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
 
     @Override
     public void info(String msg) {
+        if (!isInfoEnabled()) return;
         out(msg, null, null);
         super.info(msg);
     }
 
     @Override
     public void info(String format, Object arg) {
+        if (!isInfoEnabled()) return;
         out(format, new Object[] { arg }, null);
         super.info(format, arg);
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
+        if (!isInfoEnabled()) return;
         out(format, new Object[] { arg1, arg2 }, null);
         super.info(format, arg1, arg2);
     }
 
     @Override
     public void info(String format, Object[] argArray) {
+        if (!isInfoEnabled()) return;
         out(format, argArray, null);
         super.info(format, argArray);
     }
 
     @Override
     public void info(String msg, Throwable t) {
+        if (!isInfoEnabled()) return;
         out(msg, null, t);
         super.info(msg, t);
     }
@@ -144,60 +154,70 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
 
     @Override
     public void warn(String msg) {
+        if (!isWarnEnabled()) return;
         out(msg, null, null);
         super.warn(msg);
     }
 
     @Override
     public void warn(String format, Object arg) {
+        if (!isWarnEnabled()) return;
         out(format, new Object[] { arg }, null);
         super.warn(format, arg);
     }
 
     @Override
     public void warn(String format, Object arg1, Object arg2) {
+        if (!isWarnEnabled()) return;
         out(format, new Object[] { arg1, arg2 }, null);
         super.warn(format, arg1, arg2);
     }
 
     @Override
     public void warn(String format, Object[] argArray) {
+        if (!isWarnEnabled()) return;
         out(format, argArray, null);
         super.warn(format, argArray);
     }
 
     @Override
     public void warn(String msg, Throwable t) {
+        if (!isWarnEnabled()) return;
         out(msg, null, t);
         super.warn(msg, t);
     }
 
     @Override
     public void debug(String msg) {
+        if (!isDebugEnabled()) return;
         out(msg, null, null);
         super.debug(msg);
     }
 
     @Override
     public void debug(String format, Object arg) {
+        if (!isDebugEnabled()) return;
         out(format, new Object[] { arg }, null);
         super.debug(format, arg);
     }
 
     @Override
     public void debug(String format, Object arg1, Object arg2) {
+        if (!isDebugEnabled()) return;
         out(format, new Object[] { arg1, arg2 }, null);
         super.debug(format, arg1, arg2);
     }
 
     @Override
     public void debug(String format, Object[] argArray) {
+        if (!isDebugEnabled()) return;
         out(format, argArray, null);
         super.debug(format, argArray);
     }
 
     @Override
     public void debug(String msg, Throwable t) {
+        if (!isDebugEnabled()) return;
         out(msg, null, t);
         super.debug(msg, t);
     }
