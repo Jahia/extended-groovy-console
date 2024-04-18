@@ -62,10 +62,9 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
      * Initializes an instance of this class.
      *
      * @param logger
-     * @param fqcn
      */
-    public LoggerWrapper(Logger logger, String fqcn, Writer out) {
-        super(logger, fqcn);
+    public LoggerWrapper(Logger logger, Writer out) {
+        super(logger, logger.getName());
         this.out = new PrintWriter(out, true);
     }
 

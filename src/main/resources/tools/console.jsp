@@ -153,8 +153,8 @@
             ScriptContext ctx = new SimpleScriptContext();
             ctx.setWriter(new StringWriter());
             Bindings bindings = engine.createBindings();
-            LoggerWrapper lw = new LoggerWrapper(LoggerFactory.getLogger("org.jahia.tools.extendedgroovyConsole"),
-                    "org.jahia.tools.groovyConsole", ctx.getWriter());
+            final String loggerName = GroovyConsoleHelper.getScriptLoggerName(isPredefinedScript ? scriptURL : null);
+            LoggerWrapper lw = new LoggerWrapper(LoggerFactory.getLogger(loggerName), ctx.getWriter());
             bindings.put("log", lw);
             bindings.put("logger", lw);
             bindings.put("request", request);

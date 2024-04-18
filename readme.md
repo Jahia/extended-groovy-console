@@ -45,6 +45,7 @@ In this file, you can declare and configure the required parameters (simple exam
 * __script.title__: title of the script
 * __script.description__: short description of the script
 * __script.visibilityCondition__: [visibility condition](#visibility-condition) for the script
+* __script.logger.name__: name of a dedicated sub logger for the script
 * __script.parameters.display.width__: width of the column displaying the parameters label. Default: `400px`
 * __script.parameters.names__: comma separated list of parameters
 * __script.param.xxx.type__: type of the parameter _xxx_

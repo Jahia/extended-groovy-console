@@ -90,6 +90,8 @@ public class GroovyConsoleHelper {
     public static final String RAM_SCRIPT_URI_PREFIX = "ramScript://";
     public static final String JAVA_COMMENTS_PREFIX = "//";
     public static final String SCRIPT_CONFIGURATIONS_SECTION_BEGIN = JAVA_COMMENTS_PREFIX + " Script configurations";
+    public static final String DEFAULT_LOGGER = "org.jahia.tools.extendedgroovyConsole";
+    public static final String CUSTOM_LOGGER_PREFIX = DEFAULT_LOGGER + ".";
 
     public static StringBuilder generateScriptSkeleton() {
 
@@ -706,5 +708,13 @@ public class GroovyConsoleHelper {
         }
 
         return StringUtils.EMPTY;
+    }
+
+    public static String getScriptLoggerName(String scriptURI) {
+        final Properties confs = getScriptConfigurations(scriptURI);
+        return Optional.ofNullable(confs)
+                .map(properties -> properties.getProperty("script.logger.name"))
+                .map(CUSTOM_LOGGER_PREFIX::concat)
+                .orElse(DEFAULT_LOGGER);
     }
 }
