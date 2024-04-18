@@ -12,6 +12,7 @@ log.info("choicelistStatic = " + choicelistStatic)
 log.info("choicelistDynamic = " + choicelistDynamic)
 log.info("choicelistCombined = " + choicelistCombined)
 log.info("choicelistNodes = " + choicelistNodes)
+log.info("editablechoicelistCombined = " + editablechoicelistCombined)
 log.info("doNotKeepPreviousValue = " + doNotKeepPreviousValue)
 
 log.error("This an ERROR message")

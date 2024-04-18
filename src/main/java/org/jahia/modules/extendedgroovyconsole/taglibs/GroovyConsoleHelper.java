@@ -557,7 +557,9 @@ public class GroovyConsoleHelper {
         } else if ("textarea".equals(paramType)) {
             generateTextareaFormElement(paramName, input, confs, request);
         } else if ("choicelist".equalsIgnoreCase(paramType)) {
-            generateChoiceListFormElement(paramName, input, confs, request);
+            generateChoiceListFormElement(false, paramName, input, confs, request);
+        } else if ("editablechoicelist".equalsIgnoreCase(paramType)) {
+            generateChoiceListFormElement(true, paramName, input, confs, request);
         } else {
             logger.error(
                     String.format("Unsupported form element type for the parameter %s: %s", paramName, paramType));
@@ -619,16 +621,24 @@ public class GroovyConsoleHelper {
     }
     */
 
-    private static void generateChoiceListFormElement(String paramName, StringBuilder sb, Properties confs,
+    private static void generateChoiceListFormElement(boolean editable, String paramName, StringBuilder sb, Properties confs,
                                                       HttpServletRequest request) {
-        sb.append("<select name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
-                .append(paramName).append("\">");
+        if (editable) {
+            sb.append("<input type=\"text\" name=\"scriptParam_").append(paramName)
+                    .append("\" id=\"scriptParam_").append(paramName)
+                    .append("\" list=\"").append(paramName).append("Datalist\" />");
+            sb.append("<datalist id=\"").append(paramName).append("Datalist\">");
+        } else {
+            sb.append("<select name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
+                    .append(paramName).append("\">");
+        }
         final String paramVal = getElementDefaultValue(paramName, confs, request);
         final String values = confs.getProperty(String.format("script.param.%s.values", paramName));
         generateStaticOptions(values, paramVal, sb);
         final String dynamicvalues = confs.getProperty(String.format("script.param.%s.dynamicvalues", paramName));
         generateDynamicOptions(dynamicvalues, paramVal, sb);
-        sb.append("</select>");
+        if (editable) sb.append("</datalist>");
+        else sb.append("</select>");
     }
 
     private static void generateStaticOptions(String values, String currentValue, StringBuilder sb) {
