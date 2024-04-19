@@ -20,3 +20,16 @@
     max-height: 400px;
     overflow-y: auto
 }
+.results .log.error {
+    color: red;
+}
+.results .log.warn {
+    color: DarkOrange;
+}
+.results .log.debug {
+    color: CadetBlue;
+    font-style: italic;
+}
+.results .stacktrace {
+    color: lightgrey;
+}

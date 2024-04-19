@@ -49,6 +49,8 @@ import org.slf4j.helpers.MessageFormatter;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import static org.apache.taglibs.standard.functions.Functions.escapeXml;
+
 /**
  * SLF4J logger wrapper to also log into the provided instance of {@link PrintWriter}.
  *
@@ -57,6 +59,11 @@ import java.io.Writer;
 public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
 
     private PrintWriter out;
+    final boolean useColors;
+
+    private enum LOG_LEVEL {
+        ERROR, WARN, INFO, DEBUG
+    }
 
     /**
      * Initializes an instance of this class.
@@ -64,42 +71,47 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
      * @param logger
      */
     public LoggerWrapper(Logger logger, Writer out) {
+        this(logger, out, true);
+    }
+
+    public LoggerWrapper(Logger logger, Writer out, boolean useColors) {
         super(logger, logger.getName());
         this.out = new PrintWriter(out, true);
+        this.useColors = useColors;
     }
 
     @Override
     public void error(String msg) {
         if (!isErrorEnabled()) return;
-        out(msg, null, null);
+        out(msg, null, LOG_LEVEL.ERROR, null);
         super.error(msg);
     }
 
     @Override
     public void error(String format, Object arg) {
         if (!isErrorEnabled()) return;
-        out(format, new Object[] { arg }, null);
+        out(format, new Object[] { arg }, LOG_LEVEL.ERROR, null);
         super.error(format, arg);
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
         if (!isErrorEnabled()) return;
-        out(format, new Object[] { arg1, arg2 }, null);
+        out(format, new Object[] { arg1, arg2 }, LOG_LEVEL.ERROR, null);
         super.error(format, arg1, arg2);
     }
 
     @Override
     public void error(String format, Object[] argArray) {
         if (!isErrorEnabled()) return;
-        out(format, argArray, null);
+        out(format, argArray, LOG_LEVEL.ERROR, null);
         super.error(format, argArray);
     }
 
     @Override
     public void error(String msg, Throwable t) {
         if (!isErrorEnabled()) return;
-        out(msg, null, t);
+        out(msg, null, LOG_LEVEL.ERROR, t);
         super.error(msg, t);
     }
 
@@ -110,114 +122,132 @@ public class LoggerWrapper extends org.slf4j.ext.LoggerWrapper {
     @Override
     public void info(String msg) {
         if (!isInfoEnabled()) return;
-        out(msg, null, null);
+        out(msg, null, LOG_LEVEL.INFO, null);
         super.info(msg);
     }
 
     @Override
     public void info(String format, Object arg) {
         if (!isInfoEnabled()) return;
-        out(format, new Object[] { arg }, null);
+        out(format, new Object[] { arg }, LOG_LEVEL.INFO, null);
         super.info(format, arg);
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
         if (!isInfoEnabled()) return;
-        out(format, new Object[] { arg1, arg2 }, null);
+        out(format, new Object[] { arg1, arg2 }, LOG_LEVEL.INFO, null);
         super.info(format, arg1, arg2);
     }
 
     @Override
     public void info(String format, Object[] argArray) {
         if (!isInfoEnabled()) return;
-        out(format, argArray, null);
+        out(format, argArray, LOG_LEVEL.INFO, null);
         super.info(format, argArray);
     }
 
     @Override
     public void info(String msg, Throwable t) {
         if (!isInfoEnabled()) return;
-        out(msg, null, t);
+        out(msg, null, LOG_LEVEL.INFO, t);
         super.info(msg, t);
     }
 
-    private void out(String format, Object[] argArray, Throwable t) {
-        out.println(argArray != null ? MessageFormatter.arrayFormat(format, argArray).getMessage() : format);
+    private void out(String format, Object[] argArray, LOG_LEVEL logLevel, Throwable t) {
+        String msg = argArray != null ? MessageFormatter.arrayFormat(format, argArray).getMessage() : format;
+        msg = escapeXml(msg);
+        out.println(formatLog(msg, logLevel));
 
         if (t != null) {
-            out.println(t.getMessage());
+            out.print(getOpeningFormatting("stacktrace", logLevel));
             t.printStackTrace(out);
+            out.print(getClosingFormatting(logLevel));
         }
+    }
+
+    private String formatLog(String msg, LOG_LEVEL logLevel) {
+        if (!useColors) {
+            return msg;
+        }
+        return getOpeningFormatting("log", logLevel) + msg + getClosingFormatting(logLevel);
+    }
+
+    private String getOpeningFormatting(String type, LOG_LEVEL logLevel) {
+        return "<span class=\"" + type + " " + logLevel.name().toLowerCase() + "\">";
+    }
+
+    private String getClosingFormatting(LOG_LEVEL logLevel) {
+        return "</span>";
     }
 
     @Override
     public void warn(String msg) {
         if (!isWarnEnabled()) return;
-        out(msg, null, null);
+        out(msg, null, LOG_LEVEL.WARN, null);
         super.warn(msg);
     }
 
     @Override
     public void warn(String format, Object arg) {
         if (!isWarnEnabled()) return;
-        out(format, new Object[] { arg }, null);
+        out(format, new Object[] { arg }, LOG_LEVEL.WARN, null);
         super.warn(format, arg);
     }
 
     @Override
     public void warn(String format, Object arg1, Object arg2) {
         if (!isWarnEnabled()) return;
-        out(format, new Object[] { arg1, arg2 }, null);
+        out(format, new Object[] { arg1, arg2 }, LOG_LEVEL.WARN, null);
         super.warn(format, arg1, arg2);
     }
 
     @Override
     public void warn(String format, Object[] argArray) {
         if (!isWarnEnabled()) return;
-        out(format, argArray, null);
+        out(format, argArray, LOG_LEVEL.WARN, null);
         super.warn(format, argArray);
     }
 
     @Override
     public void warn(String msg, Throwable t) {
         if (!isWarnEnabled()) return;
-        out(msg, null, t);
+        out(msg, null, LOG_LEVEL.WARN, t);
         super.warn(msg, t);
     }
 
     @Override
     public void debug(String msg) {
         if (!isDebugEnabled()) return;
-        out(msg, null, null);
+        out(msg, null, LOG_LEVEL.DEBUG, null);
         super.debug(msg);
     }
 
     @Override
     public void debug(String format, Object arg) {
         if (!isDebugEnabled()) return;
-        out(format, new Object[] { arg }, null);
+        out(format, new Object[] { arg }, LOG_LEVEL.DEBUG, null);
         super.debug(format, arg);
     }
 
     @Override
     public void debug(String format, Object arg1, Object arg2) {
         if (!isDebugEnabled()) return;
-        out(format, new Object[] { arg1, arg2 }, null);
+        out(format, new Object[] { arg1, arg2 }, LOG_LEVEL.DEBUG, null);
         super.debug(format, arg1, arg2);
     }
 
     @Override
     public void debug(String format, Object[] argArray) {
         if (!isDebugEnabled()) return;
-        out(format, argArray, null);
+        out(format, argArray, LOG_LEVEL.DEBUG, null);
         super.debug(format, argArray);
     }
 
     @Override
     public void debug(String msg, Throwable t) {
         if (!isDebugEnabled()) return;
-        out(msg, null, t);
+        out(msg, null, LOG_LEVEL.DEBUG, t);
         super.debug(msg, t);
     }
 }

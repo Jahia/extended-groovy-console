@@ -177,7 +177,7 @@
     <fieldset>
         <legend style="color: blue">Successfully executed in ${took} ms</legend>
         <br><strong>Result:</strong><br />
-        <pre class="results" id="scriptOutput">${not empty result ? fn:escapeXml(result) : '<empty>'}</pre>
+        <pre class="results" id="scriptOutput">${not empty result ? result : '<empty>'}</pre>
         <button onclick="copyText('scriptOutput')">Copy to clipboard</button>
         </p>
     </fieldset>
