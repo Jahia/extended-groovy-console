@@ -45,6 +45,7 @@ In this file, you can declare and configure the required parameters (simple exam
 * __script.title__: title of the script
 * __script.description__: short description of the script
 * __script.visibilityCondition__: [visibility condition](#visibility-condition) for the script
+* __script.logger.name__: name of a dedicated sub logger for the script
 * __script.parameters.display.width__: width of the column displaying the parameters label. Default: `400px`
 * __script.parameters.names__: comma separated list of parameters
 * __script.param.xxx.type__: type of the parameter _xxx_
@@ -54,7 +55,7 @@ In this file, you can declare and configure the required parameters (simple exam
 
 **Parameter types**
 
-__Allowed values__: `checkbox`, `text`, `textarea`, `choicelist`  \
+__Allowed values__: `checkbox`, `text`, `textarea`, `choicelist`, `editablechoicelist`  \
 __Default value__: `checkbox`
 
 #### Parameter type: checkbox
@@ -85,7 +86,11 @@ If a default value is defined, then it is preselected. Static and dynamic values
     script.param.workspace.values=default, live
     script.param.site.type=choicelist
     script.param.site.values=all:All sites
-    script.param.site.dynamicvalues=nodes=/sites;jnt:virtualsite
+    script.param.site.dynamicvalues=nodes=/sites;jnt:virtualsite  
+
+#### Parameter type: editablechoicelist
+
+Same as `choicelist`, but the user is not limited to the provided values.
     
 #### <a name="visibility-condition">Visibility condition
 
