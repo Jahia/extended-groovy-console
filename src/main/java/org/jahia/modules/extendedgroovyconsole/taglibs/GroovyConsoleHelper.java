@@ -54,6 +54,7 @@ import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeleton;
 import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator;
 import org.jahia.osgi.BundleResource;
 import org.jahia.registries.ServicesRegistry;
+import org.jahia.services.SpringContextSingleton;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.nodetypes.initializers.ChoiceListInitializer;
@@ -726,5 +727,11 @@ public class GroovyConsoleHelper {
                 .map(properties -> properties.getProperty("script.logger.name"))
                 .map(CUSTOM_LOGGER_PREFIX::concat)
                 .orElse(DEFAULT_LOGGER);
+    }
+
+    public static List<String> getJQueryFiles() {
+        final Map<String, String> mappings = (Map<String, String>) SpringContextSingleton.getBean("org.jahia.services.render.StaticAssetMappingRegistry");
+        final String jquery = mappings.get("jquery.js");
+        return Arrays.asList(StringUtils.split(jquery));
     }
 }

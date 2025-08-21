@@ -33,7 +33,9 @@
     <%@ include file="css.jspf" %>
     <link type="text/css" href="<c:url value='/modules/assets/css/jquery.fancybox.css'/>" rel="stylesheet"/>
     <link type="text/css" href="<c:url value='/modules/assets/css/jquery-ui.smoothness.css'/>" rel="stylesheet"/>
-    <script type="text/javascript" src="<c:url value='/modules/jquery/javascript/jquery.min.js'/>"></script>
+    <c:forEach items="${tools:getJQueryFiles()}" var="jqueryFile">
+        <script type="text/javascript" src="<c:url value='/modules/jquery/javascript/${jqueryFile}'/>"></script>
+    </c:forEach>
     <script type="text/javascript" src="<c:url value='/modules/assets/javascript/jquery.fancybox.pack.js'/>"></script>
     <script type="text/javascript" src="<c:url value='/modules/assets/javascript/jquery-ui.min.js'/>"></script>
     <script type="text/javascript">

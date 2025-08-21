@@ -32,5 +32,10 @@
         <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
         <function-signature>java.util.Collection getCodeSnippets()()</function-signature>
     </function>
+    <function>
+        <name>getJQueryFiles</name>
+        <function-class>org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper</function-class>
+        <function-signature>java.util.List getJQueryFiles()</function-signature>
+    </function>
 
 </taglib>
