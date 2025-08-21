@@ -99,6 +99,7 @@
                 <configuration>
                     <instructions>
                         <Jahia-Depends>default</Jahia-Depends>
+                        <Jahia-Module-Type>system</Jahia-Module-Type>
                         <Bundle-Activator>org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator</Bundle-Activator>
                     </instructions>
                 </configuration>
