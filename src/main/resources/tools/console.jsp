@@ -22,6 +22,8 @@
 <%@ page import="org.jahia.modules.extendedgroovyconsole.LoggerWrapper" %>
 <%@ page import="org.jahia.modules.extendedgroovyconsole.taglibs.GroovyConsoleHelper" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.slf4j.Logger" %>
+<%@ page import="org.jahia.utils.DateUtils" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@taglib prefix="functions" uri="http://www.jahia.org/tags/functions" %>
@@ -156,7 +158,8 @@
             ctx.setWriter(new StringWriter());
             Bindings bindings = engine.createBindings();
             final String loggerName = GroovyConsoleHelper.getScriptLoggerName(isPredefinedScript ? scriptURL : null);
-            LoggerWrapper lw = new LoggerWrapper(LoggerFactory.getLogger(loggerName), ctx.getWriter());
+            final Logger logger = LoggerFactory.getLogger(loggerName);
+            LoggerWrapper lw = new LoggerWrapper(logger, ctx.getWriter());
             bindings.put("log", lw);
             bindings.put("logger", lw);
             bindings.put("request", request);
@@ -173,7 +176,9 @@
             ctx.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             Object result = engine.eval(code.toString(), ctx);
             pageContext.setAttribute("result", result == null ? ((StringWriter) ctx.getWriter()).getBuffer().toString() : result);
-            pageContext.setAttribute("took", System.currentTimeMillis() - timer);
+            final long duration = System.currentTimeMillis() - timer;
+            pageContext.setAttribute("took", duration);
+            logger.info("Script executed in {}", DateUtils.formatDurationWords(duration));
         //}
     %>
     <fieldset>
