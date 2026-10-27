@@ -1,4 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"
+%><%
+    // A script URI only ever designates a script that the console lists, so answer any other value with a 400.
+    final String requestedScriptURI = request.getParameter("scriptURI");
+    if (!GroovyConsoleHelper.isCustomScript(requestedScriptURI) && !GroovyConsoleHelper.isKnownScript(requestedScriptURI)) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown script");
+        return;
+    }
 %><?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -295,7 +302,7 @@
 <c:if test="${not empty scriptContent}">
     <div style="display: none;">
         <div id="viewArea">
-            <pre>${scriptContent}</pre>
+            <pre>${fn:escapeXml(scriptContent)}</pre>
         </div>
     </div>
 </c:if>

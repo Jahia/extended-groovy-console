@@ -89,6 +89,8 @@ public class GroovyConsoleHelper {
     private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleHelper.class);
     private static final Map<String, String> ramScripts = new HashMap<>();
     public static final String RAM_SCRIPT_URI_PREFIX = "ramScript://";
+    /** Value the console's script selector uses to mean "run the code typed in the textarea". */
+    public static final String CUSTOM_SCRIPT = "custom";
     public static final String JAVA_COMMENTS_PREFIX = "//";
     public static final String SCRIPT_CONFIGURATIONS_SECTION_BEGIN = JAVA_COMMENTS_PREFIX + " Script configurations";
     public static final String DEFAULT_LOGGER = "org.jahia.tools.extendedgroovyConsole";
@@ -387,7 +389,7 @@ public class GroovyConsoleHelper {
         while (resourceEnum.hasMoreElements()) {
             final BundleResource bundleResource = new BundleResource(resourceEnum.nextElement(), bundle);
             try {
-                final Properties configurations = getScriptConfigurations(bundleResource.getURI().toString());
+                final Properties configurations = readScriptConfigurations(bundleResource.getURI().toString());
                 final String visibilityKey = "script.visibilityCondition";
                 final boolean scriptVisible;
                 if (configurations == null || !configurations.containsKey(visibilityKey)) {
@@ -410,7 +412,52 @@ public class GroovyConsoleHelper {
         }
     }
 
+    /**
+     * Tells whether the requested script URI designates the custom script, i.e. the code typed into the console's
+     * textarea, rather than one of the predefined scripts.
+     *
+     * @param scriptURI the requested script URI
+     * @return <code>true</code> if the console has to run the code coming from the textarea
+     */
+    public static boolean isCustomScript(String scriptURI) {
+        return StringUtils.isBlank(scriptURI) || CUSTOM_SCRIPT.equals(scriptURI);
+    }
+
+    /**
+     * Tells whether the requested script URI designates a script that the console offers: a RAM script, or a script
+     * registered by an active module bundle.
+     * <p>
+     * The console's selector offers nothing but those scripts, so the console loads nothing else.
+     *
+     * @param scriptURI the requested script URI
+     * @return <code>true</code> if the console can load the script
+     */
+    public static boolean isKnownScript(String scriptURI) {
+        if (StringUtils.startsWith(scriptURI, RAM_SCRIPT_URI_PREFIX)) {
+            // A RAM script URI is a key in an in-memory map, never a location to open
+            return true;
+        }
+        if (StringUtils.isBlank(scriptURI)) {
+            return false;
+        }
+        final boolean known = getGroovyConsoleScripts().values().stream()
+                .flatMap(Collection::stream)
+                .anyMatch(script -> scriptURI.equals(script.getURI()));
+        if (!known) {
+            logger.warn("Rejected the Groovy console script URI {}: no active module bundle registers it", scriptURI);
+        }
+        return known;
+    }
+
     public static String getGroovyConsoleScript(String uri) {
+        return isKnownScript(uri) ? loadScript(uri) : null;
+    }
+
+    /**
+     * Loads a script without checking that the console offers it. Only call it with the URI of a RAM script or of a
+     * script found in a module bundle, never with a URI coming from the request.
+     */
+    private static String loadScript(String uri) {
         try {
             if (StringUtils.startsWith(uri, RAM_SCRIPT_URI_PREFIX)) {
                 final String content = ramScripts.get(uri.substring(RAM_SCRIPT_URI_PREFIX.length()));
@@ -447,6 +494,14 @@ public class GroovyConsoleHelper {
     }
 
     private static Properties getScriptConfigurations(String scriptURI) {
+        return isKnownScript(scriptURI) ? readScriptConfigurations(scriptURI) : null;
+    }
+
+    /**
+     * Reads the configurations of a script without checking that the console offers it. Only call it with the URI of a
+     * RAM script or of a script found in a module bundle, never with a URI coming from the request.
+     */
+    private static Properties readScriptConfigurations(String scriptURI) {
         if (StringUtils.isBlank(scriptURI)) {
             return null;
         }
@@ -470,7 +525,7 @@ public class GroovyConsoleHelper {
     }
 
     private static Properties getScriptInlineConfigurations(String scriptURI) {
-        final String script = getGroovyConsoleScript(scriptURI);
+        final String script = loadScript(scriptURI);
         if (StringUtils.isBlank(script)) return null;
 
         final Properties properties = new Properties();
