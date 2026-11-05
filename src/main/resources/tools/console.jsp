@@ -1,5 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"
 %><%
+    // The console executes scripts on the server: it stays closed outside the development and
+    // production operating modes.
+    if (!GroovyConsoleHelper.isConsoleEnabled()) {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        return;
+    }
     // A script URI only ever designates a script that the console lists, so answer any other value with a 400.
     final String requestedScriptURI = request.getParameter("scriptURI");
     if (!GroovyConsoleHelper.isCustomScript(requestedScriptURI) && !GroovyConsoleHelper.isKnownScript(requestedScriptURI)) {
@@ -261,7 +267,7 @@
 
             <p>
                     <textarea rows="25" style="width: 100%" id="text" name="script"
-                              onkeyup="if (event.key === 'Enter' && event.ctrlKey && confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();">${param.script}</textarea>
+                              onkeyup="if (event.key === 'Enter' && event.ctrlKey && confirm('<%=GroovyConsoleHelper.WARN_MSG%>')) document.getElementById('groovyForm').submit();"><c:out value="${param.script}"/></textarea>
             </p>
             <a class="fancybox-link" href="#snippetsArea">Code snippets</a>
         </c:when>

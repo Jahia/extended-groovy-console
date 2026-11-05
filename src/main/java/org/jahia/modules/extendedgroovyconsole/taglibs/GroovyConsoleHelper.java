@@ -48,6 +48,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jahia.api.Constants;
 import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeleton;
@@ -76,6 +77,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,14 +89,37 @@ public class GroovyConsoleHelper {
 
     public static final String WARN_MSG = "WARNING: You are about to execute a script, which can manipulate the repository data or execute services in Jahia. Are you sure, you want to continue?";
     private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleHelper.class);
-    private static final Map<String, String> ramScripts = new HashMap<>();
+
+    /** Upper bound of RAM scripts kept in memory, so a client cannot grow the map without limit. */
+    private static final int RAM_SCRIPTS_MAX_ENTRIES = 1000;
+    private static final Map<String, String> ramScripts = new ConcurrentHashMap<>();
     public static final String RAM_SCRIPT_URI_PREFIX = "ramScript://";
+    /** Prefix a RAM script content may start with to load the script body from a local file. */
+    public static final String LOCALFS_PREFIX = "localfs:";
     /** Value the console's script selector uses to mean "run the code typed in the textarea". */
     public static final String CUSTOM_SCRIPT = "custom";
     public static final String JAVA_COMMENTS_PREFIX = "//";
     public static final String SCRIPT_CONFIGURATIONS_SECTION_BEGIN = JAVA_COMMENTS_PREFIX + " Script configurations";
     public static final String DEFAULT_LOGGER = "org.jahia.tools.extendedgroovyConsole";
     public static final String CUSTOM_LOGGER_PREFIX = DEFAULT_LOGGER + ".";
+    /** Jahia operating mode names, as the <code>operatingMode</code> Jahia property spells them. */
+    private static final String OPERATING_MODE_DEVELOPMENT = "development";
+    private static final String OPERATING_MODE_PRODUCTION = "production";
+
+    /**
+     * Tells whether the console page may render on this server: open in the development and production operating
+     * modes, closed in any other one. The page carries a script-execution engine, so a server ran in another
+     * operating mode (a distant publication server, for instance) gets it closed. Note that the mode is compared by
+     * name: Jahia reports <code>isProductionMode()</code> for every mode but development, including a distant
+     * publication server.
+     *
+     * @return <code>true</code> if the console is available on this server
+     */
+    public static boolean isConsoleEnabled() {
+        final String operatingMode = SettingsBean.getInstance().getOperatingMode();
+        return StringUtils.equalsIgnoreCase(operatingMode, OPERATING_MODE_DEVELOPMENT)
+                || StringUtils.equalsIgnoreCase(operatingMode, OPERATING_MODE_PRODUCTION);
+    }
 
     public static StringBuilder generateScriptSkeleton() {
 
@@ -434,8 +459,14 @@ public class GroovyConsoleHelper {
      */
     public static boolean isKnownScript(String scriptURI) {
         if (StringUtils.startsWith(scriptURI, RAM_SCRIPT_URI_PREFIX)) {
-            // A RAM script URI is a key in an in-memory map, never a location to open
-            return true;
+            // A RAM script URI is a key in an in-memory map, never a location to open: it is known
+            // only when the key exists, otherwise the console would run a script it never listed.
+            final String key = scriptURI.substring(RAM_SCRIPT_URI_PREFIX.length());
+            final boolean known = ramScripts.containsKey(key);
+            if (!known) {
+                logger.warn("Rejected the Groovy console script URI {}: no such RAM script", scriptURI);
+            }
+            return known;
         }
         if (StringUtils.isBlank(scriptURI)) {
             return false;
@@ -461,9 +492,8 @@ public class GroovyConsoleHelper {
         try {
             if (StringUtils.startsWith(uri, RAM_SCRIPT_URI_PREFIX)) {
                 final String content = ramScripts.get(uri.substring(RAM_SCRIPT_URI_PREFIX.length()));
-                if (StringUtils.startsWith(content, "localfs:")) {
-                    final File file = new File(content.trim().substring("localfs:".length()));
-                    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                if (StringUtils.startsWith(content, LOCALFS_PREFIX)) {
+                    return readLocalFile(content.trim().substring(LOCALFS_PREFIX.length()));
                 }
                 return content;
             } else {
@@ -473,6 +503,23 @@ public class GroovyConsoleHelper {
             logger.error("Impossible to load the script", e);
             return null;
         }
+    }
+
+    /**
+     * Reads a script body from a local file, only from inside the Jahia var directory: the path comes from a RAM
+     * script's content, which the console must never turn into a read of an arbitrary filesystem location.
+     */
+    private static String readLocalFile(String path) throws IOException {
+        final File base = new File(SettingsBean.getInstance().getJahiaVarDiskPath());
+        final File file = new File(path);
+        if (!file.isAbsolute()) {
+            return FileUtils.readFileToString(new File(base, path), StandardCharsets.UTF_8);
+        }
+        if (!file.getCanonicalPath().startsWith(base.getCanonicalPath() + File.separator)) {
+            logger.warn("Refused to load a local script outside the Jahia var directory: {}", path);
+            return null;
+        }
+        return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     }
 
     public static String getContent(Resource resource, Charset charset) throws IOException {
@@ -567,15 +614,15 @@ public class GroovyConsoleHelper {
         sb.append("<fieldset><legend>Script configuration</legend><div class=\"scriptConfig\">");
         final String title = confs.getProperty("script.title");
         if (StringUtils.isNotBlank(title))
-            sb.append("<h2>").append(title).append("</h2>");
+            sb.append("<h2>").append(escapeHtml(title)).append("</h2>");
         final String desc = confs.getProperty("script.description");
         if (StringUtils.isNotBlank(desc))
-            sb.append("<div class=\"description\">").append(desc).append("</div>");
+            sb.append("<div class=\"description\">").append(escapeHtml(desc)).append("</div>");
         final String[] paramNames = StringUtils
                 .split(confs.getProperty("script.parameters.names", "").replaceAll("\\s", ""), ",");
         if (ArrayUtils.isNotEmpty(paramNames)) {
             final String width = confs.getProperty("script.parameters.display.width", "400px");
-            sb.append("<table><colgroup><col width=\"").append(width).append("\"/><col/></colgroup>");
+            sb.append("<table><colgroup><col width=\"").append(escapeHtml(width)).append("\"/><col/></colgroup>");
             for (String paramName : paramNames) {
                 final StringBuilder label = new StringBuilder();
                 final StringBuilder input = new StringBuilder();
@@ -625,14 +672,23 @@ public class GroovyConsoleHelper {
     }
 
     private static void generateFormElementLabel(String paramName, StringBuilder sb, Properties confs) {
-        sb.append("<label for=\"scriptParam_").append(paramName).append("\">");
-        sb.append(confs.getProperty(String.format("script.param.%s.label", paramName), paramName)).append("</label> ");
+        sb.append("<label for=\"scriptParam_").append(escapeHtml(paramName)).append("\">");
+        sb.append(escapeHtml(confs.getProperty(String.format("script.param.%s.label", paramName), paramName))).append("</label> ");
+    }
+
+    /**
+     * Escapes a value that lands in the generated form's HTML, in an element body or a double-quoted attribute alike:
+     * the values come from script configurations of any installed module and from request parameters, so the console
+     * never writes them raw.
+     */
+    private static String escapeHtml(String value) {
+        return StringEscapeUtils.escapeHtml(value);
     }
 
     private static void generateCbFormElement(String paramName, StringBuilder sb, Properties confs,
                                               HttpServletRequest request) {
-        sb.append("<input type=\"checkbox\" name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
-                .append(paramName);
+        sb.append("<input type=\"checkbox\" name=\"scriptParam_").append(escapeHtml(paramName)).append("\" id=\"scriptParam_")
+                .append(escapeHtml(paramName));
         final String paramVal = getElementDefaultValue(paramName, confs, request);
         if (StringUtils.isNotBlank(paramVal)
                 && ("on".equalsIgnoreCase(paramVal.trim()) || "true".equalsIgnoreCase(paramVal.trim())))
@@ -643,20 +699,20 @@ public class GroovyConsoleHelper {
     private static void generateTextFormElement(String paramName, StringBuilder sb, Properties confs,
                                                 HttpServletRequest request) {
         sb.append("<input type=\"text\" ");
-        sb.append("name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_").append(paramName);
+        sb.append("name=\"scriptParam_").append(escapeHtml(paramName)).append("\" id=\"scriptParam_").append(escapeHtml(paramName));
         final String paramVal = getElementDefaultValue(paramName, confs, request);
         if (StringUtils.isNotBlank(paramVal))
-            sb.append("\" value=\"").append(paramVal);
+            sb.append("\" value=\"").append(escapeHtml(paramVal));
         sb.append("\" />");
     }
 
     private static void generateTextareaFormElement(String paramName, StringBuilder sb, Properties confs,
                                                     HttpServletRequest request) {
         sb.append("<textarea ");
-        sb.append("name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_").append(paramName).append("\">");
+        sb.append("name=\"scriptParam_").append(escapeHtml(paramName)).append("\" id=\"scriptParam_").append(escapeHtml(paramName)).append("\">");
         final String paramVal = getElementDefaultValue(paramName, confs, request);
         if (StringUtils.isNotBlank(paramVal))
-            sb.append(paramVal);
+            sb.append(escapeHtml(paramVal));
         sb.append("</textarea>");
     }
 
@@ -680,13 +736,13 @@ public class GroovyConsoleHelper {
     private static void generateChoiceListFormElement(boolean editable, String paramName, StringBuilder sb, Properties confs,
                                                       HttpServletRequest request) {
         if (editable) {
-            sb.append("<input type=\"text\" name=\"scriptParam_").append(paramName)
-                    .append("\" id=\"scriptParam_").append(paramName)
-                    .append("\" list=\"").append(paramName).append("Datalist\" />");
-            sb.append("<datalist id=\"").append(paramName).append("Datalist\">");
+            sb.append("<input type=\"text\" name=\"scriptParam_").append(escapeHtml(paramName))
+                    .append("\" id=\"scriptParam_").append(escapeHtml(paramName))
+                    .append("\" list=\"").append(escapeHtml(paramName)).append("Datalist\" />");
+            sb.append("<datalist id=\"").append(escapeHtml(paramName)).append("Datalist\">");
         } else {
-            sb.append("<select name=\"scriptParam_").append(paramName).append("\" id=\"scriptParam_")
-                    .append(paramName).append("\">");
+            sb.append("<select name=\"scriptParam_").append(escapeHtml(paramName)).append("\" id=\"scriptParam_")
+                    .append(escapeHtml(paramName)).append("\">");
         }
         final String paramVal = getElementDefaultValue(paramName, confs, request);
         final String values = confs.getProperty(String.format("script.param.%s.values", paramName));
@@ -704,10 +760,10 @@ public class GroovyConsoleHelper {
             final String[] split = StringUtils.split(v, ":", 2);
             final String label = split.length > 1 ? split[1] : split[0];
             final String value = split[0].trim();
-            sb.append("<option value=\"").append(value);
+            sb.append("<option value=\"").append(escapeHtml(value));
             if (StringUtils.equals(value, currentValue))
                 sb.append("\" selected=\"selected");
-            sb.append("\">").append(label.trim()).append("</option>");
+            sb.append("\">").append(escapeHtml(label.trim())).append("</option>");
         }
     }
 
@@ -734,10 +790,10 @@ public class GroovyConsoleHelper {
         for (ChoiceListValue clValue : clValues) {
             try {
                 final String value = clValue.getValue().getString().trim();
-                sb.append("<option value=\"").append(value);
+                sb.append("<option value=\"").append(escapeHtml(value));
                 if (StringUtils.equals(value, currentValue))
                     sb.append("\" selected=\"selected");
-                sb.append("\">").append(clValue.getDisplayName()).append("</option>");
+                sb.append("\">").append(escapeHtml(clValue.getDisplayName())).append("</option>");
             } catch (RepositoryException e) {
                 logger.error("", e);
             }
@@ -767,6 +823,10 @@ public class GroovyConsoleHelper {
         final String scriptContent = request.getParameter("script");
         if (StringUtils.isBlank(scriptContent)) return "The script is empty";
 
+        if (ramScripts.size() >= RAM_SCRIPTS_MAX_ENTRIES && !ramScripts.containsKey(scriptID)) {
+            logger.warn("Refused to save the RAM script [{}]: {} entries are already kept in memory", scriptID, ramScripts.size());
+            return "Too many RAM scripts are already saved; remove some before saving new ones";
+        }
         if (ramScripts.put(scriptID, scriptContent) == null) {
             logger.info("Saved the script [{}] in memory", scriptID);
         } else {

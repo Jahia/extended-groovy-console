@@ -159,6 +159,10 @@ After writing or pasting your script in the code area, give it an ID and click o
 
 ## <a name="security"></a>Security
 
+The console executes Groovy scripts on the server. It is available on servers running in the
+`development` or `production` operating mode, and closed on servers running in any other
+operating mode.
+
 If you have secured your Jahia server according to the page
 https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block
 , you have to add the following pattern to the list:
