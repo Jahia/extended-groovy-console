@@ -49,12 +49,12 @@
     <parent>
         <artifactId>jahia-modules</artifactId>
         <groupId>org.jahia.modules</groupId>
-        <version>8.1.0.0</version>
+        <version>8.2.3.0</version>
     </parent>
     <groupId>org.jahia.community.modules</groupId>
     <artifactId>extended-groovy-console</artifactId>
     <name>Extended groovy console</name>
-    <version>2.11-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>This is the custom module (Extended groovy console) for running on a Digital Experience Manager server.</description>
 
@@ -98,7 +98,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Jahia-Depends>default</Jahia-Depends>
                         <Jahia-Module-Type>system</Jahia-Module-Type>
                         <Bundle-Activator>org.jahia.modules.extendedgroovyconsole.osgi.CodeSkeletonsLocator</Bundle-Activator>
                     </instructions>
@@ -106,12 +105,20 @@
             </plugin>
         </plugins>
     </build>
-
     <dependencies>
+        <!-- Keeps slf4j-ext in the bundle: the platform does not export org.slf4j.ext to OSGi, and
+             LoggerWrapper extends org.slf4j.ext.LoggerWrapper. Removing this dependency leaves the
+             bundle unresolved (missing requirement org.slf4j.ext), proven on Jahia 8.2.3.2. -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-ext</artifactId>
-            <version>1.6.6</version>
+            <version>${slf4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

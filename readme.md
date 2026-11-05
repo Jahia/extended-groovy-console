@@ -159,6 +159,12 @@ After writing or pasting your script in the code area, give it an ID and click o
 
 ## <a name="security"></a>Security
 
+The console executes Groovy scripts on the server, so it is closed by default on any server that
+does not run in development mode. To enable it on such a server, set the following property in
+`jahia.properties` (or as a system property) and restart:
+
+    modules.xGroovyConsole.console.enabled = true
+
 If you have secured your Jahia server according to the page
 https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block
 , you have to add the following pattern to the list:
