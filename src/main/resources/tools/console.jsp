@@ -15,6 +15,17 @@
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown script");
         return;
     }
+    // Running or saving a script changes the server state: accept it only from the console form itself, posted with the
+    // token of the session, so that a link or a form from another site cannot make an administrator run a script.
+    final String requestedAction = request.getParameter("runScript");
+    if (("true".equals(requestedAction) || "save".equals(requestedAction)) && !GroovyConsoleHelper.isScriptActionAllowed(request)) {
+        LoggerFactory.getLogger(GroovyConsoleHelper.class).warn("Refused a {} {} request without a valid console token on {}",
+                request.getMethod(), "true".equals(requestedAction) ? "run" : "save", request.getRequestURI());
+        if (!response.isCommitted()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Missing or invalid console token");
+        }
+        return;
+    }
 %><?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -200,7 +211,7 @@
     <fieldset>
         <legend style="color: blue">Successfully executed in ${took} ms</legend>
         <br><strong>Result:</strong><br />
-        <pre class="results" id="scriptOutput">${not empty result ? result : '<empty>'}</pre>
+        <pre class="results" id="scriptOutput">${fn:escapeXml(not empty result ? result : '<empty>')}</pre>
         <button onclick="copyText('scriptOutput')">Copy to clipboard</button>
         </p>
     </fieldset>
@@ -225,7 +236,7 @@
     <legend style="color: red">Error</legend>
     <p style="color: red">${fn:escapeXml(error)}</p>
     <a href="#show-stacktrace" onclick="var st=document.getElementById('stacktrace').style; st.display=st.display == 'none' ? '' : 'none'; return false;">show stacktrace</a>
-    <pre id="stacktrace" style="display:none">${stackTrace}</pre>
+    <pre id="stacktrace" style="display:none">${fn:escapeXml(stackTrace)}</pre>
 </fieldset>
 <%
         }
@@ -233,6 +244,7 @@
 %>
 <form id="groovyForm" action="?" method="post">
     <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
+    <input type="hidden" name="<%=GroovyConsoleHelper.CONSOLE_TOKEN_PARAMETER%>" value="<%=GroovyConsoleHelper.getConsoleToken(request)%>"/>
     <input type="hidden" id="runScript" name="runScript" value="true" />
     <%-- // TODO QUARTZ
     <c:if test="${empty param.scriptURI or param.scriptURI eq 'custom'}">
