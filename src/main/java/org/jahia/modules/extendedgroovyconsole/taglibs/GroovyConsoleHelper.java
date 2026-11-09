@@ -58,9 +58,11 @@ import org.jahia.registries.ServicesRegistry;
 import org.jahia.services.SpringContextSingleton;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
+import org.jahia.services.content.JCRTemplate;
 import org.jahia.services.content.nodetypes.initializers.ChoiceListInitializer;
 import org.jahia.services.content.nodetypes.initializers.ChoiceListInitializerService;
 import org.jahia.services.content.nodetypes.initializers.ChoiceListValue;
+import org.jahia.services.usermanager.JahiaUser;
 import org.jahia.settings.SettingsBean;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -105,6 +107,32 @@ public class GroovyConsoleHelper {
     /** Jahia operating mode names, as the <code>operatingMode</code> Jahia property spells them. */
     private static final String OPERATING_MODE_DEVELOPMENT = "development";
     private static final String OPERATING_MODE_PRODUCTION = "production";
+    /** JCR node the tools access permission is evaluated against, as for the tools module's own pages. */
+    private static final String TOOLS_PERMISSION_NODE = "/tools";
+    /** Privilege required to use the support tools, identical to the Shiro rule <code>perms[/tools:systemToolsAccess]</code>. */
+    private static final String TOOLS_PERMISSION = "systemToolsAccess";
+
+    /**
+     * Checks, as the connected user, that they may use the support tools. The console evaluates it inside the page, so
+     * the check holds however the request was routed and does not rest on URL-pattern rules alone. A missing user,
+     * an invisible <code>/tools</code> node or any error denies access.
+     *
+     * @return <code>true</code> only if the connected user holds <code>systemToolsAccess</code> on <code>/tools</code>
+     */
+    public static boolean isToolsAccessGranted() {
+        final JahiaUser currentUser = JCRSessionFactory.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            return false;
+        }
+        try {
+            return JCRTemplate.getInstance().doExecute(currentUser, null, null, session ->
+                    session.nodeExists(TOOLS_PERMISSION_NODE)
+                            && session.getNode(TOOLS_PERMISSION_NODE).hasPermission(TOOLS_PERMISSION));
+        } catch (Exception e) {
+            logger.warn("Unexpected error while evaluating the tools access of the user {}, denying access", currentUser.getName(), e);
+            return false;
+        }
+    }
 
     /**
      * Tells whether the console page may render on this server: open in the development and production operating
@@ -510,12 +538,12 @@ public class GroovyConsoleHelper {
      * script's content, which the console must never turn into a read of an arbitrary filesystem location.
      */
     private static String readLocalFile(String path) throws IOException {
-        final File base = new File(SettingsBean.getInstance().getJahiaVarDiskPath());
-        final File file = new File(path);
-        if (!file.isAbsolute()) {
-            return FileUtils.readFileToString(new File(base, path), StandardCharsets.UTF_8);
-        }
-        if (!file.getCanonicalPath().startsWith(base.getCanonicalPath() + File.separator)) {
+        final File base = new File(SettingsBean.getInstance().getJahiaVarDiskPath()).getCanonicalFile();
+        final File requested = new File(path);
+        // A relative path resolves against the var directory, and both forms are checked once canonical:
+        // a relative "../" path must not leave the directory any more than an absolute one.
+        final File file = (requested.isAbsolute() ? requested : new File(base, path)).getCanonicalFile();
+        if (!file.getPath().startsWith(base.getPath() + File.separator)) {
             logger.warn("Refused to load a local script outside the Jahia var directory: {}", path);
             return null;
         }
@@ -563,7 +591,10 @@ public class GroovyConsoleHelper {
                     String.format("%s.properties", StringUtils.substringBeforeLast(scriptURI, ".groovy")));
             if (!resource.exists()) return null;
             final Properties confs = new Properties();
-            confs.load(resource.getInputStream());
+            // The listing reads the configurations of every script on each render, so the stream must be closed.
+            try (InputStream is = resource.getInputStream()) {
+                confs.load(is);
+            }
             return confs;
         } catch (IOException ioe) {
             logger.error("An error occured while reading the configurations for the script " + scriptURI, ioe);
@@ -787,6 +818,7 @@ public class GroovyConsoleHelper {
                 logger.error("", e);
             }
         }
+        if (clValues == null) return;
         for (ChoiceListValue clValue : clValues) {
             try {
                 final String value = clValue.getValue().getString().trim();

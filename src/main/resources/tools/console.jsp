@@ -1,6 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"
 %><%
-    // The console executes scripts on the server: it stays closed outside the development and
+    // The console executes scripts on the server: the connected user must hold the tools permission, checked here
+    // in the page so that it holds however the request was routed (SEC-312).
+    if (!GroovyConsoleHelper.isToolsAccessGranted()) {
+        LoggerFactory.getLogger(GroovyConsoleHelper.class).warn("Denying unauthorized access to {}", request.getRequestURI());
+        if (!response.isCommitted()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        }
+        return;
+    }
+    // It also stays closed outside the development and
     // production operating modes.
     if (!GroovyConsoleHelper.isConsoleEnabled()) {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
