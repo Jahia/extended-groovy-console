@@ -163,6 +163,12 @@ The console executes Groovy scripts on the server. The page itself checks that t
 holds the `systemToolsAccess` permission on `/tools`, the permission of the Jahia tools, and
 answers 403 otherwise, however the request reached it.
 
+Running or saving a script is only accepted from the console form itself: the request must be a
+POST carrying the console token of the session, which the form includes. Any other request asking
+to run or save a script, such as a link or a form posted from another site, is answered 403 and
+logged, so an administrator cannot be made to run a script by opening a link. The script result
+and the error stack trace are rendered as text, never as HTML.
+
 If you have secured your Jahia server according to the page
 https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block
 , you have to add the following pattern to the list:

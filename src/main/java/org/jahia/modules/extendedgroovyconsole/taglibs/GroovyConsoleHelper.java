@@ -72,12 +72,15 @@ import org.springframework.core.io.UrlResource;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -108,6 +111,12 @@ public class GroovyConsoleHelper {
     private static final String TOOLS_PERMISSION_NODE = "/tools";
     /** Privilege required to use the support tools, identical to the Shiro rule <code>perms[/tools:systemToolsAccess]</code>. */
     private static final String TOOLS_PERMISSION = "systemToolsAccess";
+    /** Request parameter in which the console form sends back the token of the session. */
+    public static final String CONSOLE_TOKEN_PARAMETER = "consoleToken";
+    /** Session attribute holding the console token. */
+    private static final String CONSOLE_TOKEN_ATTRIBUTE = GroovyConsoleHelper.class.getName() + ".consoleToken";
+    private static final int CONSOLE_TOKEN_BYTES = 32;
+    private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
 
     /**
      * Checks, as the connected user, that they may use the support tools. The console evaluates it inside the page, so
@@ -129,6 +138,51 @@ public class GroovyConsoleHelper {
             logger.warn("Unexpected error while evaluating the tools access of the user {}, denying access", currentUser.getName(), e);
             return false;
         }
+    }
+
+    /**
+     * Returns the console token of the session, creating it on first use. The console form carries it, and running or
+     * saving a script requires it back: a link or a form posted from another site cannot know it, so it cannot make
+     * the browser of a connected administrator run a script. The core <code>toolAccessToken</code> is not relied on,
+     * since its URL pattern does not cover the pages of this module.
+     *
+     * @param request the current request
+     * @return the token of the session, never <code>null</code>
+     */
+    public static String getConsoleToken(HttpServletRequest request) {
+        final HttpSession session = request.getSession();
+        final Object token = session.getAttribute(CONSOLE_TOKEN_ATTRIBUTE);
+        if (token instanceof String) {
+            return (String) token;
+        }
+        final byte[] bytes = new byte[CONSOLE_TOKEN_BYTES];
+        TOKEN_RANDOM.nextBytes(bytes);
+        final String newToken = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        session.setAttribute(CONSOLE_TOKEN_ATTRIBUTE, newToken);
+        return newToken;
+    }
+
+    /**
+     * Checks that a request may run or save a script: it must be a POST carrying the console token of its own session.
+     * A GET, a request without session or token, or a token from another session is refused.
+     *
+     * @param request the current request
+     * @return <code>true</code> only for a POST whose <code>consoleToken</code> parameter matches the session token
+     */
+    public static boolean isScriptActionAllowed(HttpServletRequest request) {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            return false;
+        }
+        final HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        final Object expected = session.getAttribute(CONSOLE_TOKEN_ATTRIBUTE);
+        final String provided = request.getParameter(CONSOLE_TOKEN_PARAMETER);
+        if (!(expected instanceof String) || provided == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(((String) expected).getBytes(StandardCharsets.UTF_8), provided.getBytes(StandardCharsets.UTF_8));
     }
 
     public static StringBuilder generateScriptSkeleton() {
