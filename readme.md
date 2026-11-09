@@ -159,9 +159,9 @@ After writing or pasting your script in the code area, give it an ID and click o
 
 ## <a name="security"></a>Security
 
-The console executes Groovy scripts on the server. It is available on servers running in the
-`development` or `production` operating mode, and closed on servers running in any other
-operating mode.
+The console executes Groovy scripts on the server. The page itself checks that the connected user
+holds the `systemToolsAccess` permission on `/tools`, the permission of the Jahia tools, and
+answers 403 otherwise, however the request reached it.
 
 If you have secured your Jahia server according to the page
 https://academy.jahia.com/training-kb/knowledge-base/list-of-urls-to-block

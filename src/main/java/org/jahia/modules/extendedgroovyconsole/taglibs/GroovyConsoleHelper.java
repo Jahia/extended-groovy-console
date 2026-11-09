@@ -104,9 +104,6 @@ public class GroovyConsoleHelper {
     public static final String SCRIPT_CONFIGURATIONS_SECTION_BEGIN = JAVA_COMMENTS_PREFIX + " Script configurations";
     public static final String DEFAULT_LOGGER = "org.jahia.tools.extendedgroovyConsole";
     public static final String CUSTOM_LOGGER_PREFIX = DEFAULT_LOGGER + ".";
-    /** Jahia operating mode names, as the <code>operatingMode</code> Jahia property spells them. */
-    private static final String OPERATING_MODE_DEVELOPMENT = "development";
-    private static final String OPERATING_MODE_PRODUCTION = "production";
     /** JCR node the tools access permission is evaluated against, as for the tools module's own pages. */
     private static final String TOOLS_PERMISSION_NODE = "/tools";
     /** Privilege required to use the support tools, identical to the Shiro rule <code>perms[/tools:systemToolsAccess]</code>. */
@@ -132,21 +129,6 @@ public class GroovyConsoleHelper {
             logger.warn("Unexpected error while evaluating the tools access of the user {}, denying access", currentUser.getName(), e);
             return false;
         }
-    }
-
-    /**
-     * Tells whether the console page may render on this server: open in the development and production operating
-     * modes, closed in any other one. The page carries a script-execution engine, so a server ran in another
-     * operating mode (a distant publication server, for instance) gets it closed. Note that the mode is compared by
-     * name: Jahia reports <code>isProductionMode()</code> for every mode but development, including a distant
-     * publication server.
-     *
-     * @return <code>true</code> if the console is available on this server
-     */
-    public static boolean isConsoleEnabled() {
-        final String operatingMode = SettingsBean.getInstance().getOperatingMode();
-        return StringUtils.equalsIgnoreCase(operatingMode, OPERATING_MODE_DEVELOPMENT)
-                || StringUtils.equalsIgnoreCase(operatingMode, OPERATING_MODE_PRODUCTION);
     }
 
     public static StringBuilder generateScriptSkeleton() {

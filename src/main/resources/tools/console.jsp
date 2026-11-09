@@ -9,12 +9,6 @@
         }
         return;
     }
-    // It also stays closed outside the development and
-    // production operating modes.
-    if (!GroovyConsoleHelper.isConsoleEnabled()) {
-        response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        return;
-    }
     // A script URI only ever designates a script that the console lists, so answer any other value with a 400.
     final String requestedScriptURI = request.getParameter("scriptURI");
     if (!GroovyConsoleHelper.isCustomScript(requestedScriptURI) && !GroovyConsoleHelper.isKnownScript(requestedScriptURI)) {
